@@ -1,0 +1,3 @@
+/home/rolo/tsdb/build/CMakeFiles/tsdb.dir
+/home/rolo/tsdb/build/CMakeFiles/edit_cache.dir
+/home/rolo/tsdb/build/CMakeFiles/rebuild_cache.dir
