@@ -1,20 +1,19 @@
 #include "data_point.h"
-#include "write_back_cache.h"
-#include <iostream>
-
-using namespace std;
+// #include "write_back_cache.h"
+// #include <iostream>
+// #include <memory>
 
 int main() {
 
-  DataPoint<int> *point = new DataPoint(12, 12);
-
-  WriteBackCache<int, int> *cache = new MemTable<int, int>();
-
-  cache->append(12, 10);
-
-  auto flushed = cache->flush();
-
-  cout << flushed[0] << endl;
+  // WriteBackCache<int, int> *cache = new MemTable<int, int>();
+  //
+  // auto val = std::make_unique<int>(10);
+  //
+  // cache->set(12, std::move(val));
+  //
+  // auto flushed = cache->get_all();
+  //
+  // std::cout << flushed[0] << std::endl;
 
   return 0;
 }
