@@ -24,7 +24,7 @@ public:
 
     return encoded;
   }
-  void decode(EncodedBuffer data) override {
+  void decode(EncodedBuffer data) {
 
     timestamp = data[0];
     value = data[1];

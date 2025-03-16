@@ -1,0 +1,38 @@
+[
+{
+  "directory": "/Users/adam.lamers/tsdb/timeseries-database/build",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++  -I/Users/adam.lamers/tsdb/timeseries-database/src -isystem /Users/adam.lamers/tsdb/timeseries-database/build/_deps/googletest-src/googletest/include -isystem /Users/adam.lamers/tsdb/timeseries-database/build/_deps/googletest-src/googletest -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX15.2.sdk -o CMakeFiles/tsdb_tests.dir/tests/test_database.cpp.o -c /Users/adam.lamers/tsdb/timeseries-database/tests/test_database.cpp",
+  "file": "/Users/adam.lamers/tsdb/timeseries-database/tests/test_database.cpp",
+  "output": "CMakeFiles/tsdb_tests.dir/tests/test_database.cpp.o"
+},
+{
+  "directory": "/Users/adam.lamers/tsdb/timeseries-database/build",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++  -I/Users/adam.lamers/tsdb/timeseries-database/src -isystem /Users/adam.lamers/tsdb/timeseries-database/build/_deps/googletest-src/googletest/include -isystem /Users/adam.lamers/tsdb/timeseries-database/build/_deps/googletest-src/googletest -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX15.2.sdk -o CMakeFiles/tsdb_tests.dir/tests/test_tsdb.cpp.o -c /Users/adam.lamers/tsdb/timeseries-database/tests/test_tsdb.cpp",
+  "file": "/Users/adam.lamers/tsdb/timeseries-database/tests/test_tsdb.cpp",
+  "output": "CMakeFiles/tsdb_tests.dir/tests/test_tsdb.cpp.o"
+},
+{
+  "directory": "/Users/adam.lamers/tsdb/timeseries-database/build/_deps/googletest-build/googlemock",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++  -I/Users/adam.lamers/tsdb/timeseries-database/build/_deps/googletest-src/googlemock/include -I/Users/adam.lamers/tsdb/timeseries-database/build/_deps/googletest-src/googlemock -isystem /Users/adam.lamers/tsdb/timeseries-database/build/_deps/googletest-src/googletest/include -isystem /Users/adam.lamers/tsdb/timeseries-database/build/_deps/googletest-src/googletest -std=c++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX15.2.sdk  -DGTEST_HAS_PTHREAD=1   -o CMakeFiles/gmock.dir/src/gmock-all.cc.o -c /Users/adam.lamers/tsdb/timeseries-database/build/_deps/googletest-src/googlemock/src/gmock-all.cc",
+  "file": "/Users/adam.lamers/tsdb/timeseries-database/build/_deps/googletest-src/googlemock/src/gmock-all.cc",
+  "output": "_deps/googletest-build/googlemock/CMakeFiles/gmock.dir/src/gmock-all.cc.o"
+},
+{
+  "directory": "/Users/adam.lamers/tsdb/timeseries-database/build/_deps/googletest-build/googlemock",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++  -isystem /Users/adam.lamers/tsdb/timeseries-database/build/_deps/googletest-src/googlemock/include -isystem /Users/adam.lamers/tsdb/timeseries-database/build/_deps/googletest-src/googlemock -isystem /Users/adam.lamers/tsdb/timeseries-database/build/_deps/googletest-src/googletest/include -isystem /Users/adam.lamers/tsdb/timeseries-database/build/_deps/googletest-src/googletest -std=c++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX15.2.sdk  -DGTEST_HAS_PTHREAD=1   -o CMakeFiles/gmock_main.dir/src/gmock_main.cc.o -c /Users/adam.lamers/tsdb/timeseries-database/build/_deps/googletest-src/googlemock/src/gmock_main.cc",
+  "file": "/Users/adam.lamers/tsdb/timeseries-database/build/_deps/googletest-src/googlemock/src/gmock_main.cc",
+  "output": "_deps/googletest-build/googlemock/CMakeFiles/gmock_main.dir/src/gmock_main.cc.o"
+},
+{
+  "directory": "/Users/adam.lamers/tsdb/timeseries-database/build/_deps/googletest-build/googletest",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++  -I/Users/adam.lamers/tsdb/timeseries-database/build/_deps/googletest-src/googletest/include -I/Users/adam.lamers/tsdb/timeseries-database/build/_deps/googletest-src/googletest -std=c++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX15.2.sdk  -DGTEST_HAS_PTHREAD=1   -o CMakeFiles/gtest.dir/src/gtest-all.cc.o -c /Users/adam.lamers/tsdb/timeseries-database/build/_deps/googletest-src/googletest/src/gtest-all.cc",
+  "file": "/Users/adam.lamers/tsdb/timeseries-database/build/_deps/googletest-src/googletest/src/gtest-all.cc",
+  "output": "_deps/googletest-build/googletest/CMakeFiles/gtest.dir/src/gtest-all.cc.o"
+},
+{
+  "directory": "/Users/adam.lamers/tsdb/timeseries-database/build/_deps/googletest-build/googletest",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++  -isystem /Users/adam.lamers/tsdb/timeseries-database/build/_deps/googletest-src/googletest/include -isystem /Users/adam.lamers/tsdb/timeseries-database/build/_deps/googletest-src/googletest -std=c++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX15.2.sdk  -DGTEST_HAS_PTHREAD=1   -o CMakeFiles/gtest_main.dir/src/gtest_main.cc.o -c /Users/adam.lamers/tsdb/timeseries-database/build/_deps/googletest-src/googletest/src/gtest_main.cc",
+  "file": "/Users/adam.lamers/tsdb/timeseries-database/build/_deps/googletest-src/googletest/src/gtest_main.cc",
+  "output": "_deps/googletest-build/googletest/CMakeFiles/gtest_main.dir/src/gtest_main.cc.o"
+}
+]
