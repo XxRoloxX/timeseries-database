@@ -1,2 +1,0 @@
-/Library/Developer/CommandLineTools/usr/bin/ar qc libtsdb_lib.a CMakeFiles/tsdb_lib.dir/src/database.cpp.o CMakeFiles/tsdb_lib.dir/src/main.cpp.o CMakeFiles/tsdb_lib.dir/src/ss_table.cpp.o
-/Library/Developer/CommandLineTools/usr/bin/ranlib libtsdb_lib.a

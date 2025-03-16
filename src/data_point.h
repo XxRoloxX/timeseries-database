@@ -24,9 +24,12 @@ public:
 
     return encoded;
   }
-  void decode(EncodedBuffer data) {
+  int decode(EncodedBuffer data) {
 
     timestamp = data[0];
     value = data[1];
+
+    // Read bytes.
+    return 2;
   }
 };

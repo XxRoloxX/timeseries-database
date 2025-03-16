@@ -1,7 +1,0 @@
-add_test([=[DatabaseTest.Insert]=]  /Users/adam.lamers/tsdb/timeseries-database/build/tsdb_tests [==[--gtest_filter=DatabaseTest.Insert]==] --gtest_also_run_disabled_tests)
-set_tests_properties([=[DatabaseTest.Insert]=]  PROPERTIES WORKING_DIRECTORY /Users/adam.lamers/tsdb/timeseries-database/build SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
-add_test([=[RawSSTableWriterTest.Write]=]  /Users/adam.lamers/tsdb/timeseries-database/build/tsdb_tests [==[--gtest_filter=RawSSTableWriterTest.Write]==] --gtest_also_run_disabled_tests)
-set_tests_properties([=[RawSSTableWriterTest.Write]=]  PROPERTIES WORKING_DIRECTORY /Users/adam.lamers/tsdb/timeseries-database/build SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
-add_test([=[DataPointTest.Serialization]=]  /Users/adam.lamers/tsdb/timeseries-database/build/tsdb_tests [==[--gtest_filter=DataPointTest.Serialization]==] --gtest_also_run_disabled_tests)
-set_tests_properties([=[DataPointTest.Serialization]=]  PROPERTIES WORKING_DIRECTORY /Users/adam.lamers/tsdb/timeseries-database/build SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
-set(  tsdb_tests_TESTS DatabaseTest.Insert RawSSTableWriterTest.Write DataPointTest.Serialization)
