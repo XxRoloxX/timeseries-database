@@ -1,5 +1,0 @@
-if(EXISTS "/Users/adam.lamers/tsdb/timeseries-database/build/tsdb_tests[1]_tests.cmake")
-  include("/Users/adam.lamers/tsdb/timeseries-database/build/tsdb_tests[1]_tests.cmake")
-else()
-  add_test(tsdb_tests_NOT_BUILT tsdb_tests_NOT_BUILT)
-endif()

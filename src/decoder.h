@@ -1,10 +1,9 @@
-// #include "encoder.h"
-// template<typename T>class Decoder{
-//     virtual T decode(EncodedBuffer data)=0;
-// };
+#pragma once
 
-// template <typename T>
-// inline T Decoder<T>::decode(EncodedBuffer data)
-// {
-//     return T();
-// }
+#include "error.h"
+#include <vector>
+
+template <typename K> class Decoder {
+  virtual Result<K> decode(std::vector<char> data) = 0;
+  virtual Result<std::vector<K>> decode_many(std::vector<char> data) = 0;
+};
