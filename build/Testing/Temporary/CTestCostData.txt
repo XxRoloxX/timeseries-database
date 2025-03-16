@@ -1,0 +1,5 @@
+DatabaseTest.Insert 12 0.000754576
+DataPointTest.Serialization 12 0.00046359
+TSDBTests 12 0.000598976
+RawSSTableWriterTest.Write 11 0.000745652
+---

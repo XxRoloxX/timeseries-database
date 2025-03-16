@@ -4,6 +4,7 @@
 #include <gtest/gtest.h>
 #include <memory>
 #include <vector>
+#include "ss_table.h"
 
 using namespace std;
 
@@ -17,10 +18,18 @@ int insert_test() {
   return records.size();
 }
 
+int write_test(){
+  auto table = new RawSSTableWriter<char>();
+  auto vec = vector<char>();
+  vec.push_back('a');
+  vec.push_back('b');
+  vec.push_back('c');
+  table->write("./test_table", vec);
+  return 1;
+}
+
 TEST(DatabaseTest, Insert) { EXPECT_EQ(1, insert_test()); }
 
-int main(int argc, char **argv) {
-  ::testing::InitGoogleTest(&argc, argv);
-
-  return RUN_ALL_TESTS();
+TEST(RawSSTableWriterTest, Write) {
+  EXPECT_EQ(1, write_test());
 }

@@ -12,20 +12,6 @@ include(FetchContent)
 
 Set(FETCHCONTENT_QUIET FALSE) # Needed to print downloading progress
 
-# Add boost lib sources
-set(BOOST_INCLUDE_LIBRARIES serialization)
-set(BOOST_ENABLE_CMAKE ON)
-
-FetchContent_Declare(
-    boost
-    GIT_REPOSITORY https://github.com/boostorg/boost.git
-    GIT_TAG boost-1.81.0  # specify your desired version
-)
-
-FetchContent_MakeAvailable(boost)
-
-find_package(Boost REQUIRED COMPONENTS serialization)
-
 # Create a library with all source files
 add_library(tsdb_lib STATIC ${SRCS})  # Change tsdb from executable to static library
 
