@@ -66,9 +66,10 @@ Set(FETCHCONTENT_QUIET FALSE) # Needed to print downloading progress
 
 # Create a library with all source files
 add_library(tsdb_lib STATIC ${SRCS})  # Static library
+set(CMAKE_BUILD_TYPE Debug)
 
 # # Create an executable for the main program
-add_executable(tsdb main.cpp)  # Assuming you have a main.cpp for the program entry point
+add_executable(tsdb src/main.cpp)  # Assuming you have a main.cpp for the program entry point
 target_link_libraries(tsdb tsdb_lib)  # Link the executable to the static library
 
 # Enable compile_commands.json for clangd
