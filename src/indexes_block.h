@@ -1,16 +1,29 @@
+#pragma once
+
 #include "data_point.h"
 #include <vector>
 
 struct IndexMapping {
   DataPointKey key;
   int offset;
+
+  bool operator>(const IndexMapping &) const;
+  bool operator<(const IndexMapping &) const;
+  bool operator==(const IndexMapping &) const;
 };
+
+struct IndexResult {
+  int start_byte_offset;
+  int end_byte_offset;
+};
+
 class IndexesMetadataBlock {
 private:
-  std::vector<char> raw_indicies_block;
   std::vector<IndexMapping> indexes;
 
 public:
-  void load_raw(std::vector<char> data);
-  void load_indexes(std::vector<IndexMapping> data);
+  // IndexesMetadataBlock();
+  void decode(std::vector<char> data);
+  std::vector<char> encode();
+  IndexResult index_range(DataPointKey start_key, DataPointKey end_key);
 };
