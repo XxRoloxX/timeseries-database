@@ -1,6 +1,7 @@
 #include "data_point.h"
 #include "decoder.h"
 #include "encoder.h"
+#include "indexes_block.h"
 #include "logger.h"
 #include "ss_table.h"
 #include <format>
@@ -16,6 +17,7 @@ private:
   std::vector<DataPoint<K>> data;
   std::shared_ptr<Decoder<K>> decoder;
   std::shared_ptr<Encoder<K>> encoder;
+  IndexesMetadataBlock indexes;
 
 public:
   GenericSSTable(std::shared_ptr<Logger> logger,
@@ -27,6 +29,9 @@ public:
   ~GenericSSTable() = default;
   void read() {
     this->raw_table->read();
+
+    auto raw_indexes = this->raw_table->get_indexes();
+    this->indexes.decode(*raw_indexes);
 
     auto raw_data = this->raw_table->get_data();
 

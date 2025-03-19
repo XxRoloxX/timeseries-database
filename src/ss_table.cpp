@@ -1,4 +1,5 @@
 #include "ss_table.h"
+#include "error.h"
 #include <format>
 #include <fstream>
 #include <iostream>
@@ -10,9 +11,29 @@ RawSSTable::RawSSTable(std::shared_ptr<Logger> logger, std::string name)
 
   this->logger->info(std::format("created reader for {}", this->name));
 }
-void read();
-std::vector<char> load_table_range(const std::string &filePath,
-                                   std::size_t startByte, std::size_t endByte);
+
+Result<std::vector<char>> RawSSTable::load_range(std::size_t startByte,
+                                                 std::size_t endByte) {
+
+  std::ifstream file(this->name, std::ios::in | std::ofstream::binary);
+  if (!file) {
+    this->logger->error("failed to read file: " + this->name);
+    return Error(std::format("failed to read file: {}", this->name));
+  }
+
+  file.seekg(startByte, std::ios::beg);
+  std::streamsize size = endByte - startByte;
+
+  this->logger->info(
+      std::format("reading data of size {} from {}", size, this->name));
+
+  std::vector<char> file_data(size);
+  if (!file.read(file_data.data(), size)) {
+    this->logger->error("failed to load table from file");
+  }
+
+  return file_data;
+};
 
 void RawSSTable::load(std::vector<char> *raw) {
 
@@ -33,7 +54,7 @@ void RawSSTable::load(std::vector<char> *raw) {
   std::vector<char> new_indices(
       raw->begin() + metadata.get_indexes_block_offset(), raw->end());
 
-  this->data = std::move(new_data);
+  // this->data = std::move(new_data);
   this->indices = std::move(new_indices);
 }
 
@@ -80,10 +101,19 @@ void RawSSTable::read() {
 
   this->load(&file_data);
 }
+
 std::shared_ptr<std::vector<char>> RawSSTable::get_data() {
   return std::make_shared<std::vector<char>>(this->data);
 }
 
-std::shared_ptr<std::vector<char>> RawSSTable::get_indices() {
+void RawSSTable::set_data(std::vector<char> new_data) {
+  this->data = std::move(new_data);
+}
+
+void RawSSTable::set_indexes(std::vector<char> new_indexes) {
+  this->data = std::move(new_indexes);
+}
+
+std::shared_ptr<std::vector<char>> RawSSTable::get_indexes() {
   return std::make_shared<std::vector<char>>(this->indices);
 }

@@ -17,6 +17,7 @@ Result<int> MetadataBlock::load(std::vector<char> *data) {
   this->indexes_block_offset = index_offset;
   return INDEXES_METADATA_BLOCK_OFFSET_LENGTH_BYTES;
 }
+
 std::vector<char> MetadataBlock::encode() {
   std::vector<char> encoded_data(sizeof(int));
   std::memcpy(encoded_data.data(), &this->indexes_block_offset, sizeof(int));
