@@ -22,8 +22,8 @@ private:
 
 public:
   RawSSTable(std::shared_ptr<Logger> logger, std::string name);
-  void read();
-  Result<std::vector<char>> load_range(std::size_t startByte,
+  void initialize();
+  Result<std::vector<char>> read_range(std::size_t startByte,
                                        std::size_t endByte);
 
   void merge_with(std::shared_ptr<RawSSTable> table) {};

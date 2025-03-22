@@ -12,7 +12,7 @@ RawSSTable::RawSSTable(std::shared_ptr<Logger> logger, std::string name)
   this->logger->info(std::format("created reader for {}", this->name));
 }
 
-Result<std::vector<char>> RawSSTable::load_range(std::size_t startByte,
+Result<std::vector<char>> RawSSTable::read_range(std::size_t startByte,
                                                  std::size_t endByte) {
 
   std::ifstream file(this->name, std::ios::in | std::ofstream::binary);
@@ -80,7 +80,7 @@ void RawSSTable::update_metadata() {
                                           METADATA_BLOCK_LENGTH_BYTES);
 }
 
-void RawSSTable::read() {
+void RawSSTable::initialize() {
 
   std::ifstream file(this->name, std::ios::in | std::ofstream::binary);
   if (!file) {
