@@ -28,7 +28,7 @@ public:
         encoder(encoder) {};
   ~GenericSSTable() = default;
   void read() {
-    this->raw_table->read();
+    this->raw_table->initialize();
 
     auto raw_indexes = this->raw_table->get_indexes();
     this->indexes.decode(*raw_indexes);
@@ -57,9 +57,24 @@ public:
     }
   };
   std::vector<char> load_table_range(const std::string &filePath,
-                                     std::size_t startByte,
-                                     std::size_t endByte) {
-    return {};
+                                     int start_key,
+                                     int end_key) {
+
+    auto results = this->indexes.index_range(start_key, end_key);
+    auto datapoints_result = this->raw_table->read_range(results.start_byte_offset, results.end_byte_offset);
+    if (auto err = std::get_if<Error>(datapoints_result)) {
+      this->logger->error("{} failed to read range from: {}, [{}-{}]", 
+        err->message,
+        this->name, 
+        results.start_byte_offset, 
+        results.end_byte_offset);
+      return {};
+    }
+
+    EncodedBuffer raw_datapoints = std::get<EncodedBuffer>(datapoints_result);
+    std::vector<DataPoint<K>> datapoints = this->decoder->decode_many(raw_datapoints);
+
+    return datapoints;
   };
   void merge_with(std::shared_ptr<RawSSTable> table) {};
   void load_data(std::vector<DataPoint<K>> new_data) { this->data = new_data; };
