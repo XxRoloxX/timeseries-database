@@ -1,13 +1,13 @@
-#include "error.h"
-#include "metadata_block.h"
+#include "./metadata_block.h"
 #include <cstring>
 #include <format>
+#include <stdexcept>
 #include <vector>
 
-Result<int> MetadataBlock::load(std::vector<char> *data) {
+int MetadataBlock::load(std::vector<char> *data) {
   if (data->size() < INDEXES_METADATA_BLOCK_OFFSET_LENGTH_BYTES) {
-    return Error(std::format("data passed to metadata block is too short: {}",
-                             data->size()));
+    throw std::runtime_error(std::format(
+        "data passed to metadata block is too short: {}", data->size()));
   }
 
   int index_offset = 0;
