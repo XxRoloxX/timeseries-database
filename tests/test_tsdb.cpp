@@ -1,5 +1,5 @@
-#include "data_point.h"
-#include "write_back_cache.h"
+#include "cache/write_back_cache.h"
+#include "datapoints/data_point.h"
 #include <gtest/gtest.h>
 #include <vector>
 

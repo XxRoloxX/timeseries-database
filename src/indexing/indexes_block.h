@@ -1,6 +1,6 @@
 #pragma once
 
-#include "data_point.h"
+#include "../datapoints/data_point.h"
 #include <vector>
 
 struct IndexMapping {

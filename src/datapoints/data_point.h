@@ -1,6 +1,6 @@
 #pragma once
 
-#include "encodable.h"
+#include "../encoding/encodable.h"
 #include <format>
 #include <memory>
 #include <string>
@@ -25,7 +25,7 @@ public:
   DataPoint<T> &operator=(const DataPoint<T> &data_point) = default;
   ~DataPoint() = default;
   EncodedBuffer encode() override {
-    std::vector<char> encoded;
+    EncodedBuffer encoded;
 
     encoded.push_back(timestamp);
 

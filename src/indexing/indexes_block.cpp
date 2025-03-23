@@ -1,4 +1,4 @@
-#include "indexes_block.h"
+#include "./indexes_block.h"
 #include <vector>
 
 bool IndexMapping::operator>(const IndexMapping &f) const {
@@ -52,5 +52,5 @@ IndexResult IndexesMetadataBlock::index_range(DataPointKey start_key,
   return result;
 }
 
-void IndexesMetadataBlock::decode(std::vector<char> data) {}
+void IndexesMetadataBlock::decode(EncodedBuffer data) {}
 std::vector<char> IndexesMetadataBlock::encode() { return {}; }

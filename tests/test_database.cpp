@@ -1,7 +1,7 @@
 
-#include "data_point.h"
 #include "database.h"
-#include "ss_table.h"
+#include "datapoints/data_point.h"
+#include "storage/ss_table_storage.h"
 #include <gtest/gtest.h>
 #include <memory>
 #include <vector>

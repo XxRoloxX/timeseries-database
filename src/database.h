@@ -1,7 +1,7 @@
 #pragma once
 
-#include "encoder.h"
-#include "write_back_cache.h"
+#include "cache/write_back_cache.h"
+#include "encoding/encoder.h"
 #include <string>
 
 class Database {
