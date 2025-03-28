@@ -22,8 +22,10 @@ private:
   std::vector<IndexMapping> indexes;
 
 public:
-  // IndexesMetadataBlock();
-  void decode(std::vector<char> data);
+  IndexesMetadataBlock(std::vector<IndexMapping> mappings);
+  IndexesMetadataBlock();
+  void decode(EncodedBuffer &data);
   std::vector<char> encode();
+  std::size_t size();
   IndexResult index_range(DataPointKey start_key, DataPointKey end_key);
 };

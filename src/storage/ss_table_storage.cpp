@@ -9,7 +9,7 @@
 SSTableStorage::SSTableStorage(std::shared_ptr<Logger> logger, std::string name)
     : logger(logger), name(std::move(name)) {
 
-  this->logger->info(std::format("created reader for {}", this->name));
+  this->logger->info(std::format("created storage for {}", this->name));
 }
 
 std::shared_ptr<EncodedBuffer> SSTableStorage::read_range(std::size_t startByte,
@@ -65,10 +65,13 @@ void SSTableStorage::save() {
 
   this->update_metadata();
 
-  std::vector<char> encoded_metadata = this->metadata.encode();
+  EncodedBuffer encoded_metadata = this->metadata.encode();
   file.write(encoded_metadata.data(), encoded_metadata.size());
   file.write(this->data.data(), this->data.size());
   file.write(this->indices.data(), this->indices.size());
+
+  this->logger->info(std::format("successfuly written {} bytes to {}",
+                                 this->data.size(), this->name));
 };
 
 void SSTableStorage::update_metadata() {
@@ -96,6 +99,8 @@ void SSTableStorage::initialize() {
   }
 
   this->load(&file_data);
+
+  this->logger->info(std::format("initialized table {}", this->name));
 }
 
 std::shared_ptr<EncodedBuffer> SSTableStorage::get_data() {

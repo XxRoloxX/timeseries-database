@@ -1,17 +1,18 @@
-#include "./indexed_ss_table.h"
+#include "./indexed_ss_table_reader.h"
 #include <memory>
+#include <stdexcept>
 
 template <typename K>
-IndexedSSTable<K>::IndexedSSTable(std::shared_ptr<Logger> logger,
-                                  std::shared_ptr<SSTableStorage> raw_table,
-                                  std::shared_ptr<Decoder<K>> decoder,
-                                  std::shared_ptr<Encoder<K>> encoder)
+IndexedSSTableReader<K>::IndexedSSTableReader(
+    std::shared_ptr<Logger> logger, std::shared_ptr<SSTableStorage> raw_table,
+    std::shared_ptr<Decoder<K>> decoder, std::shared_ptr<Encoder<K>> encoder)
     : logger(logger), raw_table(raw_table), decoder(decoder), encoder(encoder) {
 }
 
-template <typename K> IndexedSSTable<K>::~IndexedSSTable() = default;
+template <typename K>
+IndexedSSTableReader<K>::~IndexedSSTableReader() = default;
 
-template <typename K> void IndexedSSTable<K>::initialize() {
+template <typename K> void IndexedSSTableReader<K>::initialize() {
   this->raw_table->initialize();
 
   this->name = this->raw_table->get_name();
@@ -24,7 +25,9 @@ template <typename K> void IndexedSSTable<K>::initialize() {
 
 template <typename K>
 std::shared_ptr<std::vector<DataPoint<K>>>
-IndexedSSTable<K>::read_range(DataPointKey start_key, DataPointKey end_key) {
+IndexedSSTableReader<K>::read_range(DataPointKey start_key,
+                                    DataPointKey end_key) {
+
   auto results = this->indexes.index_range(start_key, end_key);
 
   try {
@@ -59,10 +62,10 @@ IndexedSSTable<K>::read_range(DataPointKey start_key, DataPointKey end_key) {
 // }
 
 template <typename K>
-std::shared_ptr<std::vector<DataPoint<K>>> IndexedSSTable<K>::get_data() {
+std::shared_ptr<std::vector<DataPoint<K>>> IndexedSSTableReader<K>::get_data() {
   return std::make_shared<std::vector<DataPoint<K>>>(this->data);
 }
 
 // Explicit template instantiations
-template class IndexedSSTable<int>;
+template class IndexedSSTableReader<int>;
 // template class IndexedSSTable<std::string>;
