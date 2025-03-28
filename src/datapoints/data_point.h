@@ -14,6 +14,7 @@ private:
 
 public:
   T get_value() { return value; }
+  DataPointKey get_key() { return timestamp; }
   DataPoint() = default;
   DataPoint(DataPointKey timestamp, T value) {
     this->value = value;

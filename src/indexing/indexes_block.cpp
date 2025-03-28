@@ -1,4 +1,5 @@
 #include "./indexes_block.h"
+#include <cstring>
 #include <vector>
 
 bool IndexMapping::operator>(const IndexMapping &f) const {
@@ -41,8 +42,16 @@ IndexMapping find_closest_index(std::vector<IndexMapping> *elements,
   return (*elements)[mid];
 };
 
+IndexesMetadataBlock::IndexesMetadataBlock() = default;
+IndexesMetadataBlock::IndexesMetadataBlock(std::vector<IndexMapping> mappings)
+    : indexes(mappings) {}
+
 IndexResult IndexesMetadataBlock::index_range(DataPointKey start_key,
                                               DataPointKey end_key) {
+
+  if (indexes.size() == 0) {
+    throw std::runtime_error("indexes not loaded");
+  }
 
   IndexMapping start = find_closest_index(&indexes, start_key);
   IndexMapping end = find_closest_index(&indexes, start_key);
@@ -52,5 +61,26 @@ IndexResult IndexesMetadataBlock::index_range(DataPointKey start_key,
   return result;
 }
 
-void IndexesMetadataBlock::decode(EncodedBuffer data) {}
-std::vector<char> IndexesMetadataBlock::encode() { return {}; }
+std::size_t IndexesMetadataBlock::size() { return this->indexes.size(); }
+
+void IndexesMetadataBlock::decode(EncodedBuffer &data) {
+
+  size_t mapping_size = sizeof(IndexMapping);
+
+  for (size_t i = 0; i < data.size() / mapping_size; i++) {
+    IndexMapping index;
+    std::memcpy(&index, data.data() + i * mapping_size, mapping_size);
+    this->indexes.push_back(index);
+  }
+}
+EncodedBuffer IndexesMetadataBlock::encode() {
+  EncodedBuffer result;
+
+  for (auto &index : this->indexes) {
+    EncodedBuffer encoded_index(sizeof(IndexMapping));
+    std::memcpy(encoded_index.data(), &index, sizeof(IndexMapping));
+    result.insert(result.end(), encoded_index.begin(), encoded_index.end());
+  }
+
+  return result;
+}

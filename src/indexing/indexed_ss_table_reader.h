@@ -9,7 +9,7 @@
 #include <memory>
 #include <vector>
 
-template <typename K> class IndexedSSTable {
+template <typename K> class IndexedSSTableReader {
 private:
   std::string name;
   std::shared_ptr<Logger> logger;
@@ -20,12 +20,12 @@ private:
   IndexesMetadataBlock indexes;
 
 public:
-  IndexedSSTable(std::shared_ptr<Logger> logger,
-                 std::shared_ptr<SSTableStorage> raw_table,
-                 std::shared_ptr<Decoder<K>> decoder,
-                 std::shared_ptr<Encoder<K>> encoder);
+  IndexedSSTableReader(std::shared_ptr<Logger> logger,
+                       std::shared_ptr<SSTableStorage> raw_table,
+                       std::shared_ptr<Decoder<K>> decoder,
+                       std::shared_ptr<Encoder<K>> encoder);
 
-  ~IndexedSSTable();
+  ~IndexedSSTableReader();
 
   void initialize();
   std::shared_ptr<std::vector<DataPoint<K>>> read_range(DataPointKey start_key,

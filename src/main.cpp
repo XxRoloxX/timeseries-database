@@ -1,35 +1,35 @@
 #include "./encoding/binary_encoder.h"
-#include "./indexing/indexed_ss_table.h"
+#include "./indexing/indexed_ss_table_reader.h"
+#include "./indexing/indexed_ss_table_writer.h"
 #include <memory>
 
 int main() {
-
-  std::shared_ptr<Logger> logger = std::make_shared<StdLogger>();
-  std::shared_ptr<SSTableStorage> raw_table =
-      std::make_shared<SSTableStorage>(logger, "table1");
 
   std::shared_ptr<Decoder<int>> decoder =
       std::make_shared<DataPointDecoder<int>>();
   std::shared_ptr<Encoder<int>> encoder =
       std::make_shared<DataPointEncoder<int>>();
 
-  auto indexed_table = std::make_shared<IndexedSSTable<int>>(logger, raw_table,
-                                                             decoder, encoder);
+  std::shared_ptr<Logger> logger = std::make_shared<StdLogger>();
 
   std::vector<DataPoint<int>> data = {
       DataPoint<int>(12, 12),
       DataPoint<int>(13, 14),
   };
 
-  // indexed_table->load_data(data);
+  auto ss_table_writer =
+      std::make_shared<IndexedSSTableWriter<int>>(logger, decoder, encoder);
 
-  // indexed_table->save();
+  ss_table_writer->save("table1",
+                        std::make_shared<std::vector<DataPoint<int>>>(data));
 
-  std::shared_ptr<SSTableStorage> read_table =
+  std::shared_ptr<SSTableStorage> raw_table =
       std::make_shared<SSTableStorage>(logger, "table1");
 
-  auto generic_table_2 = std::make_shared<IndexedSSTable<int>>(
+  raw_table->initialize();
+
+  auto indexed_table = std::make_shared<IndexedSSTableReader<int>>(
       logger, raw_table, decoder, encoder);
 
-  // generic_table_2->read();
+  indexed_table->read_range(12, 14);
 }
