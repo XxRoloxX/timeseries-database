@@ -13,8 +13,8 @@ int main() {
   std::shared_ptr<Logger> logger = std::make_shared<StdLogger>();
 
   std::vector<DataPoint<int>> data = {
-      DataPoint<int>(12, 12),
-      DataPoint<int>(13, 14),
+      DataPoint<int>(12, 12), DataPoint<int>(13, 14), DataPoint<int>(13, 14),
+      DataPoint<int>(13, 14), DataPoint<int>(13, 14), DataPoint<int>(17, 14),
   };
 
   auto ss_table_writer =
@@ -31,5 +31,13 @@ int main() {
   auto indexed_table = std::make_shared<IndexedSSTableReader<int>>(
       logger, raw_table, decoder, encoder);
 
-  indexed_table->read_range(12, 14);
+  // indexed_table->get_data();
+  indexed_table->initialize();
+
+  auto datapoints = indexed_table->read_range(12, 17);
+
+  logger->info("RESULTS");
+  for (auto &point : *datapoints) {
+    logger->info(point.to_string());
+  }
 }

@@ -6,7 +6,7 @@
 #include <memory>
 #include <string>
 
-const int METADATA_BLOCK_LENGTH_BYTES = 100;
+// const int METADATA_BLOCK_LENGTH_BYTES = 100;
 
 class SSTableStorage {
 private:
@@ -16,7 +16,7 @@ private:
   std::shared_ptr<Logger> logger;
   std::string name;
   MetadataBlock metadata;
-  IndexesMetadataBlock indexes;
+  // IndexesMetadataBlock indexes;
 
   void load(EncodedBuffer *raw);
 

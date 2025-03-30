@@ -1,4 +1,5 @@
 #include "./indexed_ss_table_reader.h"
+#include <format>
 #include <memory>
 #include <stdexcept>
 
@@ -13,14 +14,18 @@ template <typename K>
 IndexedSSTableReader<K>::~IndexedSSTableReader() = default;
 
 template <typename K> void IndexedSSTableReader<K>::initialize() {
+
   this->raw_table->initialize();
 
   this->name = this->raw_table->get_name();
 
   auto raw_indexes = this->raw_table->get_indexes();
+  this->logger->info(
+      std::format("RAW INDEXES: {}", encoded_buffer_to_string(raw_indexes)));
+
   this->indexes.decode(*raw_indexes);
 
-  this->logger->info(std::format("initializes ss_table: {}", this->name));
+  this->logger->info(std::format("initialized ss_table: {}", this->name));
 }
 
 template <typename K>
@@ -29,6 +34,10 @@ IndexedSSTableReader<K>::read_range(DataPointKey start_key,
                                     DataPointKey end_key) {
 
   auto results = this->indexes.index_range(start_key, end_key);
+
+  this->logger->info(std::format("results: start: {}, end: {}",
+                                 results.start_byte_offset,
+                                 results.end_byte_offset));
 
   try {
     auto datapoints_result = this->raw_table->read_range(

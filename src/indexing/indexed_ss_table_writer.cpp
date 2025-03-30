@@ -15,10 +15,11 @@ void IndexedSSTableWriter<K>::save(
     auto encoded_datapoint =
         this->encoder->encode(std::make_shared<DataPoint<K>>(datapoint));
 
-    current_offset += encoded_datapoint.size();
+    indexes.push_back(IndexMapping{.key = datapoint.get_key(),
+                                   .offset = current_offset,
+                                   .length = encoded_datapoint.size()});
 
-    indexes.push_back(
-        IndexMapping{.key = datapoint.get_key(), .offset = current_offset});
+    current_offset += encoded_datapoint.size();
   }
 
   auto encoded_datapoints = this->encoder->encode_many(datapoints);
@@ -33,6 +34,9 @@ void IndexedSSTableWriter<K>::save(
 
   this->logger->info(
       std::format("saving {} datapoints to {}", datapoints->size(), name));
+
+  this->logger->info(
+      std::format("saving {} indexes to {}", indexes.size(), name));
   storage.save();
 }
 
