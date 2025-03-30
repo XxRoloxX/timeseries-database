@@ -4,9 +4,9 @@
 #include <memory>
 #include <vector>
 
-template <typename K> class Decoder {
+class Decoder {
 public:
-  virtual DataPoint<K> decode(std::shared_ptr<EncodedBuffer> data) = 0;
-  virtual std::vector<DataPoint<K>>
+  virtual DataPoint decode(std::shared_ptr<EncodedBuffer> data) = 0;
+  virtual std::vector<DataPoint>
   decode_many(std::shared_ptr<EncodedBuffer> data) = 0;
 };

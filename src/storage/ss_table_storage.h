@@ -1,12 +1,11 @@
 #pragma once
 
-#include "../indexing/indexes_block.h"
 #include "../logger/logger.h"
 #include "./metadata_block.h"
 #include <memory>
 #include <string>
 
-// const int METADATA_BLOCK_LENGTH_BYTES = 100;
+const std::string STORAGE_PATH = "storage";
 
 class SSTableStorage {
 private:
@@ -16,7 +15,6 @@ private:
   std::shared_ptr<Logger> logger;
   std::string name;
   MetadataBlock metadata;
-  // IndexesMetadataBlock indexes;
 
   void load(EncodedBuffer *raw);
 

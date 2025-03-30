@@ -7,20 +7,19 @@
 #include <memory>
 #include <vector>
 
-template <typename K> class IndexedSSTableWriter {
+class IndexedSSTableWriter {
 private:
   std::shared_ptr<Logger> logger;
-  std::shared_ptr<Decoder<K>> decoder;
-  std::shared_ptr<Encoder<K>> encoder;
+  std::shared_ptr<Decoder> decoder;
+  std::shared_ptr<Encoder> encoder;
 
 public:
   IndexedSSTableWriter(std::shared_ptr<Logger> logger,
-                       std::shared_ptr<Decoder<K>> decoder,
-                       std::shared_ptr<Encoder<K>> encoder);
+                       std::shared_ptr<Decoder> decoder,
+                       std::shared_ptr<Encoder> encoder);
 
   ~IndexedSSTableWriter();
 
-  // void initialize();
   void save(std::string name,
-            std::shared_ptr<std::vector<DataPoint<K>>> datapoints);
+            std::shared_ptr<std::vector<DataPoint>> datapoints);
 };

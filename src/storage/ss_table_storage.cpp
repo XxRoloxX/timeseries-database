@@ -15,7 +15,8 @@ SSTableStorage::SSTableStorage(std::shared_ptr<Logger> logger, std::string name)
 std::shared_ptr<EncodedBuffer> SSTableStorage::read_range(std::size_t startByte,
                                                           std::size_t endByte) {
 
-  std::ifstream file(this->name, std::ios::in | std::ofstream::binary);
+  std::ifstream file(STORAGE_PATH + "/" + this->name,
+                     std::ios::in | std::ofstream::binary);
 
   if (!file) {
     this->logger->error("failed to read file: " + this->name);
@@ -43,17 +44,7 @@ std::shared_ptr<EncodedBuffer> SSTableStorage::read_range(std::size_t startByte,
 void SSTableStorage::load(EncodedBuffer *raw) {
 
   // We start reading the blob with metadata block.
-  int read_bytes = metadata.load(raw);
-
-  this->logger->info(std::format("loaded metadata of size: {}", read_bytes));
-
-  int data_offset = read_bytes;
-
-  this->logger->info(std::format("buffer of size: {}, {}", data_offset,
-                                 metadata.get_indexes_block_offset()));
-
-  this->logger->info(
-      std::format("indexes offset {}", metadata.get_indexes_block_offset()));
+  auto _ = metadata.load(raw);
 
   std::vector<char> new_indices(
       raw->begin() + metadata.get_indexes_block_offset(), raw->end());
@@ -62,7 +53,22 @@ void SSTableStorage::load(EncodedBuffer *raw) {
 }
 
 void SSTableStorage::save() {
-  std::ofstream file(this->name, std::ios::binary);
+
+  if (!std::filesystem::is_directory(STORAGE_PATH)) {
+    std::filesystem::create_directory(STORAGE_PATH);
+  }
+
+  // auto now = std::chrono::system_clock::now();
+  //
+  // auto duration = now.time_since_epoch();
+  //
+  // auto milliseconds =
+  //     std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+  //
+  // std::string name_with_timestamp =
+  //     std::format("{}-{}", this->name, milliseconds);
+
+  std::ofstream file(STORAGE_PATH + "/" + this->name, std::ios::binary);
   if (!file) {
     this->logger->error("failed to open a file: " + this->name);
     return;
