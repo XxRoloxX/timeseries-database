@@ -23,6 +23,8 @@ public:
   void initialize();
   std::shared_ptr<EncodedBuffer> read_range(std::size_t start_byte,
                                             std::size_t end_byte);
+
+  std::shared_ptr<EncodedBuffer> read_all();
   void merge_with(std::shared_ptr<SSTableStorage> table) {};
   void set_data(EncodedBuffer data);
   void set_indexes(EncodedBuffer indexes);

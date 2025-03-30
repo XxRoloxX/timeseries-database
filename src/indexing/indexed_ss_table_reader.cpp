@@ -55,6 +55,13 @@ IndexedSSTableReader::read_range(DataPointKey start_key, DataPointKey end_key) {
   }
 }
 
-std::shared_ptr<std::vector<DataPoint>> IndexedSSTableReader::get_data() {
-  return std::make_shared<std::vector<DataPoint>>(this->data);
+std::shared_ptr<std::vector<DataPoint>> IndexedSSTableReader::read_all() {
+
+  auto encoded_points = this->raw_table->read_all();
+  auto decoded_points = this->decoder->decode_many(encoded_points);
+
+  return std::make_shared<std::vector<DataPoint>>(decoded_points);
 }
+// std::shared_ptr<std::vector<DataPoint>> IndexedSSTableReader::get_data() {
+//   return std::make_shared<std::vector<DataPoint>>(this->data);
+// }

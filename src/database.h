@@ -7,6 +7,7 @@
 
 class Database {
 public:
+  ~Database();
   Database(std::shared_ptr<Logger> logger, std::shared_ptr<Decoder> decoder,
            std::shared_ptr<Encoder> encoder, size_t memtable_size,
            std::shared_ptr<WriteBackCache<DataPointKey, DataPoint>> cache,

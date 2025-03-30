@@ -30,7 +30,7 @@ public:
   void initialize();
   std::shared_ptr<std::vector<DataPoint>> read_range(DataPointKey start_key,
                                                      DataPointKey end_key);
-  // void save();
+  std::shared_ptr<std::vector<DataPoint>> read_all();
   std::string get_name();
   std::shared_ptr<std::vector<DataPoint>> get_data();
   std::shared_ptr<std::vector<DataPoint>> get_indexes();

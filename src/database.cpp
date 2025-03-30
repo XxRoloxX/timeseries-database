@@ -56,14 +56,39 @@ void Database::load_tables() {
   for (const auto &file : std::filesystem::directory_iterator(STORAGE_PATH)) {
 
     std::filesystem::path path = file.path();
+
     std::shared_ptr<SSTableStorage> storage =
         make_shared<SSTableStorage>(this->logger, path.filename());
 
     IndexedSSTableReader reader(this->logger, storage, this->decoder,
                                 this->encoder);
 
+    reader.initialize();
+
+    if (path.filename() == "cache") {
+      auto cached_points = reader.read_all();
+      for (auto &point : *cached_points) {
+        this->memtable->set(point.get_key(), point);
+      }
+
+      this->logger->info(std::format("loaded {} points from saved cache",
+                                     cached_points->size()));
+    }
+
     this->readers.push_back(reader);
   }
+}
+Database::~Database() {
+  auto cached_points = this->memtable->get_all();
+
+  SSTableStorage storage(this->logger, "cache");
+
+  auto encoded_points = this->encoder->encode_many(
+      std::make_shared<std::vector<DataPoint>>(cached_points));
+
+  storage.set_data(encoded_points);
+
+  storage.save();
 }
 
 Database::Database(
@@ -72,4 +97,7 @@ Database::Database(
     std::shared_ptr<WriteBackCache<DataPointKey, DataPoint>> cache,
     std::shared_ptr<IndexedSSTableWriter> ss_writer)
     : memtable_size(memtable_size), decoder(decoder), encoder(encoder),
-      logger(logger), memtable(cache), ss_writer(ss_writer) {}
+      logger(logger), memtable(cache), ss_writer(ss_writer) {
+
+  this->load_tables();
+}

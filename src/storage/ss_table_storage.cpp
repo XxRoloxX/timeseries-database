@@ -41,6 +41,37 @@ std::shared_ptr<EncodedBuffer> SSTableStorage::read_range(std::size_t startByte,
   return std::make_shared<EncodedBuffer>(file_data);
 };
 
+std::shared_ptr<EncodedBuffer> SSTableStorage::read_all() {
+  std::ifstream file(STORAGE_PATH + "/" + this->name,
+                     std::ios::in | std::ofstream::binary);
+
+  if (!file) {
+    this->logger->error("failed to read file: " + this->name);
+    throw std::filesystem::filesystem_error(
+        "file not found: ",
+        std::make_error_code(std::errc::no_such_file_or_directory));
+  }
+
+  file.seekg(0, std::ios::end);
+
+  auto end_pos = file.tellg();
+
+  file.seekg(INDEXES_METADATA_BLOCK_OFFSET_LENGTH_BYTES, std::ios::beg);
+
+  std::streamsize size =
+      int(end_pos) - INDEXES_METADATA_BLOCK_OFFSET_LENGTH_BYTES;
+
+  this->logger->info(
+      std::format("reading data of size {} from {}", size, this->name));
+
+  std::vector<char> file_data(size);
+  if (!file.read(file_data.data(), size)) {
+    this->logger->error("failed to load table from file");
+  }
+
+  return std::make_shared<EncodedBuffer>(file_data);
+}
+
 void SSTableStorage::load(EncodedBuffer *raw) {
 
   // We start reading the blob with metadata block.
@@ -57,16 +88,6 @@ void SSTableStorage::save() {
   if (!std::filesystem::is_directory(STORAGE_PATH)) {
     std::filesystem::create_directory(STORAGE_PATH);
   }
-
-  // auto now = std::chrono::system_clock::now();
-  //
-  // auto duration = now.time_since_epoch();
-  //
-  // auto milliseconds =
-  //     std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
-  //
-  // std::string name_with_timestamp =
-  //     std::format("{}-{}", this->name, milliseconds);
 
   std::ofstream file(STORAGE_PATH + "/" + this->name, std::ios::binary);
   if (!file) {
