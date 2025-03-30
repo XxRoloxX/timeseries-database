@@ -54,37 +54,6 @@ IndexMapping find_closest_index(std::vector<IndexMapping> *elements,
 
   return {};
 }
-// std::size_t min_idx = 0;
-// std::size_t max_idx = elements->size() - 1;
-// std::size_t mid = (max_idx + min_idx) / 2;
-//
-// std::cout << searched_value << std::endl;
-//
-// while (min_idx + 1 < max_idx) {
-//
-//   std::cout << min_idx << " " << max_idx << std::endl;
-//   std::cout << elements->at(mid).to_string() << std::endl;
-//
-//   mid = (max_idx + min_idx) / 2;
-//
-//   if ((*elements)[mid].key == searched_value) {
-//     return elements->at(mid);
-//   }
-//
-//   if ((*elements)[mid].key < searched_value) {
-//     min_idx = mid;
-//     continue;
-//   }
-//
-//   if ((*elements)[mid].key > searched_value) {
-//     max_idx = mid;
-//     continue;
-//   }
-// }
-//
-// return elements->at(mid);
-//}
-;
 
 IndexesMetadataBlock::IndexesMetadataBlock() = default;
 IndexesMetadataBlock::IndexesMetadataBlock(std::vector<IndexMapping> mappings)

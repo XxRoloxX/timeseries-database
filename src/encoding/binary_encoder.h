@@ -4,24 +4,25 @@
 #include <memory>
 #include <vector>
 
-template <typename T> class DataPointDecoder : public Decoder<T> {
+class DataPointDecoder : public Decoder {
 public:
-  DataPoint<T> decode(std::shared_ptr<std::vector<char>> data) override {
-    DataPoint<T> data_point;
+  DataPoint decode(std::shared_ptr<std::vector<char>> data) override {
+    DataPoint data_point;
     data_point.decode(data);
     return data_point;
   };
-  std::vector<DataPoint<T>>
+  std::vector<DataPoint>
   decode_many(std::shared_ptr<std::vector<char>> data) override {
-    auto iter = 0;
-    std::vector<DataPoint<T>> result;
+
+    size_t iter = 0;
+    std::vector<DataPoint> result;
     while (iter < data->size()) {
 
       std::shared_ptr<std::vector<char>> slice =
           std::make_shared<std::vector<char>>(data->begin() + iter,
                                               data->end());
 
-      DataPoint<T> data_point;
+      DataPoint data_point;
       auto read = data_point.decode(slice);
 
       iter += read;
@@ -32,13 +33,13 @@ public:
   };
 };
 
-template <typename T> class DataPointEncoder : public Encoder<T> {
+class DataPointEncoder : public Encoder {
 public:
-  EncodedBuffer encode(std::shared_ptr<DataPoint<T>> data) override {
+  EncodedBuffer encode(std::shared_ptr<DataPoint> data) override {
     return data->encode();
   };
   EncodedBuffer
-  encode_many(std::shared_ptr<std::vector<DataPoint<T>>> data) override {
+  encode_many(std::shared_ptr<std::vector<DataPoint>> data) override {
     EncodedBuffer res;
 
     for (auto &point : *data) {

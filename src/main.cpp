@@ -1,43 +1,40 @@
 #include "./encoding/binary_encoder.h"
-#include "./indexing/indexed_ss_table_reader.h"
 #include "./indexing/indexed_ss_table_writer.h"
+#include "database.h"
 #include <memory>
+#include <unistd.h>
 
 int main() {
 
-  std::shared_ptr<Decoder<int>> decoder =
-      std::make_shared<DataPointDecoder<int>>();
-  std::shared_ptr<Encoder<int>> encoder =
-      std::make_shared<DataPointEncoder<int>>();
+  std::shared_ptr<Decoder> decoder = std::make_shared<DataPointDecoder>();
+  std::shared_ptr<Encoder> encoder = std::make_shared<DataPointEncoder>();
 
   std::shared_ptr<Logger> logger = std::make_shared<StdLogger>();
 
-  std::vector<DataPoint<int>> data = {
-      DataPoint<int>(12, 12), DataPoint<int>(13, 14), DataPoint<int>(13, 14),
-      DataPoint<int>(13, 14), DataPoint<int>(13, 14), DataPoint<int>(17, 14),
+  std::vector<DataPoint> data = {
+      DataPoint(12, std::vector<char>{19}),
+      DataPoint(13, std::vector<char>{18}),
+      DataPoint(14, std::vector<char>{17}),
+      DataPoint(15, std::vector<char>{13}),
+      DataPoint(16, std::vector<char>{13}),
+      DataPoint(17, std::vector<char>{14}),
+      DataPoint(18, std::vector<char>{17}),
+
   };
-
   auto ss_table_writer =
-      std::make_shared<IndexedSSTableWriter<int>>(logger, decoder, encoder);
+      std::make_shared<IndexedSSTableWriter>(logger, decoder, encoder);
 
-  ss_table_writer->save("table1",
-                        std::make_shared<std::vector<DataPoint<int>>>(data));
+  std::shared_ptr<WriteBackCache<DataPointKey, DataPoint>> cache =
+      std::make_shared<MemTable<DataPointKey, DataPoint>>();
 
-  std::shared_ptr<SSTableStorage> raw_table =
-      std::make_shared<SSTableStorage>(logger, "table1");
+  Database *database =
+      new Database(logger, decoder, encoder, 3, cache, ss_table_writer);
 
-  raw_table->initialize();
+  auto points = database->read(10, 20);
 
-  auto indexed_table = std::make_shared<IndexedSSTableReader<int>>(
-      logger, raw_table, decoder, encoder);
-
-  // indexed_table->get_data();
-  indexed_table->initialize();
-
-  auto datapoints = indexed_table->read_range(12, 17);
-
-  logger->info("RESULTS");
-  for (auto &point : *datapoints) {
+  for (auto &point : data) {
     logger->info(point.to_string());
+    // database->insert("series-a", point.get_key(), point.get_value());
+    // sleep(1);
   }
 }

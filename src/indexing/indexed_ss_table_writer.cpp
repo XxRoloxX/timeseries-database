@@ -3,17 +3,16 @@
 #include "indexes_block.h"
 #include <memory>
 
-template <typename K>
-void IndexedSSTableWriter<K>::save(
-    std::string name, std::shared_ptr<std::vector<DataPoint<K>>> datapoints) {
+void IndexedSSTableWriter::save(
+    std::string name, std::shared_ptr<std::vector<DataPoint>> datapoints) {
 
   std::vector<IndexMapping> indexes;
 
-  int current_offset = 0;
+  size_t current_offset = 0;
 
   for (auto &datapoint : *datapoints) {
     auto encoded_datapoint =
-        this->encoder->encode(std::make_shared<DataPoint<K>>(datapoint));
+        this->encoder->encode(std::make_shared<DataPoint>(datapoint));
 
     indexes.push_back(IndexMapping{.key = datapoint.get_key(),
                                    .offset = current_offset,
@@ -40,13 +39,9 @@ void IndexedSSTableWriter<K>::save(
   storage.save();
 }
 
-template <typename K>
-IndexedSSTableWriter<K>::IndexedSSTableWriter(
-    std::shared_ptr<Logger> logger, std::shared_ptr<Decoder<K>> decoder,
-    std::shared_ptr<Encoder<K>> encoder)
+IndexedSSTableWriter::IndexedSSTableWriter(std::shared_ptr<Logger> logger,
+                                           std::shared_ptr<Decoder> decoder,
+                                           std::shared_ptr<Encoder> encoder)
     : logger(logger), decoder(decoder), encoder(encoder) {}
 
-template <typename K>
-IndexedSSTableWriter<K>::~IndexedSSTableWriter() = default;
-
-template class IndexedSSTableWriter<int>;
+IndexedSSTableWriter::~IndexedSSTableWriter() = default;

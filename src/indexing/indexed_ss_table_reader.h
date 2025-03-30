@@ -9,29 +9,29 @@
 #include <memory>
 #include <vector>
 
-template <typename K> class IndexedSSTableReader {
+class IndexedSSTableReader {
 private:
   std::string name;
   std::shared_ptr<Logger> logger;
   std::shared_ptr<SSTableStorage> raw_table;
-  std::vector<DataPoint<K>> data;
-  std::shared_ptr<Decoder<K>> decoder;
-  std::shared_ptr<Encoder<K>> encoder;
+  std::vector<DataPoint> data;
+  std::shared_ptr<Decoder> decoder;
+  std::shared_ptr<Encoder> encoder;
   IndexesMetadataBlock indexes;
 
 public:
   IndexedSSTableReader(std::shared_ptr<Logger> logger,
                        std::shared_ptr<SSTableStorage> raw_table,
-                       std::shared_ptr<Decoder<K>> decoder,
-                       std::shared_ptr<Encoder<K>> encoder);
+                       std::shared_ptr<Decoder> decoder,
+                       std::shared_ptr<Encoder> encoder);
 
   ~IndexedSSTableReader();
 
   void initialize();
-  std::shared_ptr<std::vector<DataPoint<K>>> read_range(DataPointKey start_key,
-                                                        DataPointKey end_key);
+  std::shared_ptr<std::vector<DataPoint>> read_range(DataPointKey start_key,
+                                                     DataPointKey end_key);
   // void save();
   std::string get_name();
-  std::shared_ptr<std::vector<DataPoint<K>>> get_data();
-  std::shared_ptr<std::vector<DataPoint<K>>> get_indexes();
+  std::shared_ptr<std::vector<DataPoint>> get_data();
+  std::shared_ptr<std::vector<DataPoint>> get_indexes();
 };

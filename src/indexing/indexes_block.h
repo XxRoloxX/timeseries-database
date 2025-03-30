@@ -5,7 +5,7 @@
 
 struct IndexMapping {
   DataPointKey key;
-  int offset;
+  size_t offset;
   size_t length;
 
   bool operator>(const IndexMapping &) const;
@@ -15,8 +15,8 @@ struct IndexMapping {
 };
 
 struct IndexResult {
-  int start_byte_offset;
-  int end_byte_offset;
+  size_t start_byte_offset;
+  size_t end_byte_offset;
 };
 
 class IndexesMetadataBlock {
