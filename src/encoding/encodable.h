@@ -1,9 +1,25 @@
 
 #pragma once
 
+#include <format>
+#include <memory>
+#include <string>
 #include <vector>
 
 using EncodedBuffer = std::vector<char>;
+
+inline std::string
+encoded_buffer_to_string(std::shared_ptr<EncodedBuffer> buf) {
+  std::string res = "[";
+  for (auto &ch : *buf) {
+    res.append(std::format("{}", int(ch)));
+    res.append(",");
+  }
+
+  res.append("]");
+
+  return res;
+}
 
 class Encodable {
 public:

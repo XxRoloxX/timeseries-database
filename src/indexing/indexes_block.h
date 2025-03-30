@@ -6,10 +6,12 @@
 struct IndexMapping {
   DataPointKey key;
   int offset;
+  size_t length;
 
   bool operator>(const IndexMapping &) const;
   bool operator<(const IndexMapping &) const;
   bool operator==(const IndexMapping &) const;
+  std::string to_string() const;
 };
 
 struct IndexResult {

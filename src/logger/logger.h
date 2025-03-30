@@ -1,6 +1,8 @@
 #pragma once
 
+#include "../encoding/encodable.h"
 #include <string>
+
 class Logger {
 public:
   virtual void info(std::string msg) = 0;

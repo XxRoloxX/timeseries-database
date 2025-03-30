@@ -24,7 +24,9 @@ std::shared_ptr<EncodedBuffer> SSTableStorage::read_range(std::size_t startByte,
         std::make_error_code(std::errc::no_such_file_or_directory));
   }
 
-  file.seekg(startByte, std::ios::beg);
+  file.seekg(startByte + INDEXES_METADATA_BLOCK_OFFSET_LENGTH_BYTES,
+             std::ios::beg);
+
   std::streamsize size = endByte - startByte;
 
   this->logger->info(
@@ -43,10 +45,15 @@ void SSTableStorage::load(EncodedBuffer *raw) {
   // We start reading the blob with metadata block.
   int read_bytes = metadata.load(raw);
 
+  this->logger->info(std::format("loaded metadata of size: {}", read_bytes));
+
   int data_offset = read_bytes;
 
-  EncodedBuffer new_data(raw->begin() + data_offset,
-                         raw->begin() + metadata.get_indexes_block_offset());
+  this->logger->info(std::format("buffer of size: {}, {}", data_offset,
+                                 metadata.get_indexes_block_offset()));
+
+  this->logger->info(
+      std::format("indexes offset {}", metadata.get_indexes_block_offset()));
 
   std::vector<char> new_indices(
       raw->begin() + metadata.get_indexes_block_offset(), raw->end());
@@ -61,7 +68,7 @@ void SSTableStorage::save() {
     return;
   }
   this->logger->info(std::format("writing to file: {}, size: {}", this->name,
-                                 this->data.size()));
+                                 this->data.size() + this->indices.size()));
 
   this->update_metadata();
 
@@ -71,12 +78,13 @@ void SSTableStorage::save() {
   file.write(this->indices.data(), this->indices.size());
 
   this->logger->info(std::format("successfuly written {} bytes to {}",
-                                 this->data.size(), this->name));
+                                 this->data.size() + this->indices.size(),
+                                 this->name));
 };
 
 void SSTableStorage::update_metadata() {
-  this->metadata.set_indexes_block_offset(this->data.size() +
-                                          METADATA_BLOCK_LENGTH_BYTES);
+  this->metadata.set_indexes_block_offset(
+      this->data.size() + INDEXES_METADATA_BLOCK_OFFSET_LENGTH_BYTES);
 }
 
 void SSTableStorage::initialize() {
@@ -93,8 +101,10 @@ void SSTableStorage::initialize() {
   this->logger->info(std::format("reading file of size: {}", size));
   file.seekg(0, std::ios::beg);
 
+  this->data.resize(size);
+
   EncodedBuffer file_data(size);
-  if (!file.read(this->data.data(), size)) {
+  if (!file.read(file_data.data(), size)) {
     this->logger->error("failed to load table from file");
   }
 
@@ -112,7 +122,7 @@ void SSTableStorage::set_data(EncodedBuffer new_data) {
 }
 
 void SSTableStorage::set_indexes(EncodedBuffer new_indexes) {
-  this->data = std::move(new_indexes);
+  this->indices = std::move(new_indexes);
 }
 
 std::shared_ptr<EncodedBuffer> SSTableStorage::get_indexes() {
