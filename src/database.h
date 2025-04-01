@@ -28,4 +28,5 @@ private:
 
   void save_table(std::string series_name, std::vector<DataPoint> points);
   void load_tables();
+  void clear_cache();
 };

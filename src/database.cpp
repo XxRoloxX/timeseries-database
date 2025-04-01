@@ -12,10 +12,16 @@ void Database::insert(std::string series_name, DataPointKey key,
     auto cache_contents = this->memtable->get_all();
     this->save_table(series_name, cache_contents);
     this->load_tables();
-    this->memtable->purge();
+    this->clear_cache();
   }
 
   this->memtable->set(key, DataPoint(key, value));
+}
+
+void Database::clear_cache() {
+  auto size = this->memtable->purge();
+  this->logger->info(std::format("purged {} elements from cache", size));
+  std::filesystem::remove(STORAGE_PATH + "/" + "cache");
 }
 
 void Database::save_table(std::string series_name,
@@ -53,6 +59,12 @@ std::vector<DataPoint> Database::read(DataPointKey start, DataPointKey end) {
 void Database::load_tables() {
   this->readers = std::vector<IndexedSSTableReader>();
 
+  if (!std::filesystem::is_directory(STORAGE_PATH)) {
+    this->logger->info(std::format(
+        "No storage path, skipping loading tables: {}", STORAGE_PATH));
+    return;
+  }
+
   for (const auto &file : std::filesystem::directory_iterator(STORAGE_PATH)) {
 
     std::filesystem::path path = file.path();
@@ -73,6 +85,7 @@ void Database::load_tables() {
 
       this->logger->info(std::format("loaded {} points from saved cache",
                                      cached_points->size()));
+      continue;
     }
 
     this->readers.push_back(reader);
@@ -80,6 +93,12 @@ void Database::load_tables() {
 }
 Database::~Database() {
   auto cached_points = this->memtable->get_all();
+
+  // Skipping writing to disk when cache is empty.
+  if (cached_points.size() == 0) {
+    this->logger->info("cache is empty, skipping saving to file");
+    return;
+  }
 
   SSTableStorage storage(this->logger, "cache");
 

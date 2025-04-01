@@ -116,7 +116,8 @@ void SSTableStorage::update_metadata() {
 
 void SSTableStorage::initialize() {
 
-  std::ifstream file(this->name, std::ios::in | std::ofstream::binary);
+  std::ifstream file(STORAGE_PATH + "/" + this->name,
+                     std::ios::in | std::ofstream::binary);
   if (!file) {
     this->logger->error("failed to read file: " + this->name);
     return;

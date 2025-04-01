@@ -69,9 +69,6 @@ IndexResult IndexesMetadataBlock::index_range(DataPointKey start_key,
   IndexMapping start = find_closest_index(&indexes, start_key, false);
   IndexMapping end = find_closest_index(&indexes, end_key, true);
 
-  std::cout << start.to_string() << std::endl;
-  std::cout << end.to_string() << std::endl;
-
   // Adding the end.length so that the last element is included.
   IndexResult result{.start_byte_offset = start.offset,
                      .end_byte_offset = end.offset + end.length};

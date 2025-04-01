@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../logger/logger.h"
+#include <format>
 #include <map>
 #include <memory>
 #include <optional>
@@ -12,15 +14,16 @@ public:
   virtual std::vector<V> get_range(K start, K end) = 0;
   virtual std::optional<V> get(K key) = 0;
   virtual size_t size() = 0;
-  virtual void purge() = 0;
+  virtual int purge() = 0;
 };
 
 template <class K, class V> class MemTable : public WriteBackCache<K, V> {
 private:
   std::map<K, V> cache;
+  std::shared_ptr<Logger> logger;
 
 public:
-  MemTable() {}
+  MemTable(std::shared_ptr<Logger> logger) : logger(logger) {}
   void set(K key, V val) override { cache[key] = val; }
   std::vector<V> get_all() override {
 
@@ -52,9 +55,16 @@ public:
       }
     }
 
+    this->logger->info(
+        std::format("reading data of size {} from cache", res.size()));
+
     return res;
   }
 
   size_t size() override { return cache.size(); }
-  void purge() override { cache = std::map<K, V>(); }
+  int purge() override {
+    auto size = cache.size();
+    cache = std::map<K, V>();
+    return size;
+  }
 };
