@@ -1,4 +1,5 @@
 #include "database.h"
+#include "encoding/encodable.h"
 #include "indexing/indexed_ss_table_reader.h"
 #include "utils.h"
 #include <memory>
@@ -8,6 +9,9 @@ using std::move;
 
 void Database::insert(std::string series_name, DataPointKey key,
                       DataPointValue value) {
+
+  this->logger->info(std::format("inserting {},{} in {}", key,
+                                 encoded_buffer_to_string(value), series_name));
 
   auto cache = this->storage_manager->get_cache();
 
@@ -36,11 +40,16 @@ void Database::compact_tables() {
                                           this->indexed_readers.at(1));
   }
 
+  this->storage_manager->reload_tables();
+
   this->load_indexed_tables();
 }
 
 std::vector<DataPoint> Database::read(std::string series_name,
                                       DataPointKey start, DataPointKey end) {
+
+  this->logger->info(
+      std::format("reading from {} to {} for {}", series_name, start, end));
 
   std::vector<DataPoint> points;
   for (auto &reader : this->indexed_readers) {
@@ -90,40 +99,3 @@ void Database::load_indexed_tables() {
     this->indexed_readers.push_back(reader);
   }
 }
-
-// std::vector<DataPoint> Database::merge_points(std::vector<DataPoint> *a,
-//                                               std::vector<DataPoint> *b) {
-//
-//   std::vector<DataPoint> result;
-//   size_t a_index = 0;
-//   size_t b_index = 0;
-//
-//   while (a_index != a->size() || b_index != b->size()) {
-//
-//     if (a_index == a->size()) {
-//       result.push_back(b->at(b_index));
-//       b_index++;
-//       continue;
-//     }
-//
-//     if (b_index == b->size()) {
-//       result.push_back(a->at(a_index));
-//       a_index++;
-//       continue;
-//     }
-//
-//     if (a->at(a_index).get_key() <= b->at(b_index).get_key()) {
-//       result.push_back(a->at(a_index));
-//       a_index++;
-//       continue;
-//     }
-//
-//     if (a->at(a_index).get_key() > b->at(b_index).get_key()) {
-//       result.push_back(b->at(b_index));
-//       b_index++;
-//       continue;
-//     }
-//   }
-//
-//   return std::move(result);
-// }

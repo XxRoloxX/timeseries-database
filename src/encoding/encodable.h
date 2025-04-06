@@ -8,10 +8,9 @@
 
 using EncodedBuffer = std::vector<char>;
 
-inline std::string
-encoded_buffer_to_string(std::shared_ptr<EncodedBuffer> buf) {
+inline std::string encoded_buffer_to_string(EncodedBuffer &buf) {
   std::string res = "[";
-  for (auto &ch : *buf) {
+  for (auto &ch : buf) {
     res.append(std::format("{}", int(ch)));
     res.append(",");
   }

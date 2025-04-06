@@ -12,7 +12,7 @@ SSTableStorage::SSTableStorage(std::shared_ptr<Logger> logger,
     : logger(logger), name(std::move(name)), series(series),
       base_path(base_path) {
 
-  this->logger->info(std::format("created storage for {}", this->name));
+  this->logger->info(std::format("loaded storage for {}", this->name));
 }
 
 std::shared_ptr<EncodedBuffer> SSTableStorage::read_range(std::size_t startByte,
@@ -34,7 +34,7 @@ std::shared_ptr<EncodedBuffer> SSTableStorage::read_range(std::size_t startByte,
   std::streamsize size = endByte - startByte;
 
   this->logger->info(
-      std::format("reading data of size {} from {}", size, this->name));
+      std::format("reading {} bytes from {} storage", size, this->name));
 
   std::vector<char> file_data(size);
   if (!file.read(file_data.data(), size)) {
@@ -63,8 +63,7 @@ std::shared_ptr<EncodedBuffer> SSTableStorage::read_all() {
   std::streamsize size =
       int(end_pos) - INDEXES_METADATA_BLOCK_OFFSET_LENGTH_BYTES;
 
-  this->logger->info(
-      std::format("reading data of size {} from {}", size, this->name));
+  this->logger->info(std::format("reading {} bytes from {}", size, this->name));
 
   std::vector<char> file_data(size);
   if (!file.read(file_data.data(), size)) {
@@ -232,7 +231,7 @@ std::string SSTableStorage::get_name() { return this->name; }
 
 void SSTableStorage::remove() {
 
-  if (std::filesystem::exists(this->get_path())) {
+  if (!std::filesystem::exists(this->get_path())) {
     this->logger->error(
         std::format("failed to remove ss table storage (file {} doesn't exist)",
                     this->get_path()));
@@ -240,10 +239,6 @@ void SSTableStorage::remove() {
   }
 
   std::filesystem::remove(this->get_path());
-
-  std::ifstream file(this->get_path(), std::ios::in | std::ofstream::binary);
-  if (!file) {
-    this->logger->error("failed to read file: " + this->name);
-    return;
-  }
+  this->logger->info(
+      std::format("removed compacted ss_table: {}", this->get_path()));
 }

@@ -25,6 +25,10 @@ void IndexedSSTableReader::initialize() {
       std::format("initialized ss_table: {}", this->raw_table->get_name()));
 }
 
+std::string IndexedSSTableReader::get_name() {
+  return this->raw_table->get_name();
+}
+
 std::shared_ptr<std::vector<DataPoint>>
 IndexedSSTableReader::read_range(DataPointKey start_key, DataPointKey end_key) {
 

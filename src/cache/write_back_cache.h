@@ -50,13 +50,12 @@ public:
     std::vector<V> res;
 
     for (auto [key, value] : cache) {
-      if (key >= start && end <= end) {
+      if (key >= start && key <= end) {
         res.push_back(value);
       }
     }
 
-    this->logger->info(
-        std::format("reading data of size {} from cache", res.size()));
+    this->logger->info(std::format("reading {} points from cache", res.size()));
 
     return res;
   }

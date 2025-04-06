@@ -3,6 +3,7 @@
 #include "./storage/storage_manager.h"
 #include "./utils.h"
 #include "database.h"
+#include "datapoints/data_point.h"
 #include <iostream>
 #include <memory>
 #include <unistd.h>
@@ -63,9 +64,19 @@ int main() {
       }
 
       auto key = stoi(tokens[1], 0, 10);
-      auto value = stoi(tokens[2], 0, 10);
+      int value = stoi(tokens[2], 0, 10);
 
-      database.insert("cli", key, std::vector{char(value)});
+      auto value_length = sizeof(int);
+
+      EncodedBuffer encoded_value(POINT_LENGTH_BYTES + value_length);
+
+      std::memcpy(encoded_value.data(), &value_length,
+                  sizeof(POINT_LENGTH_BYTES));
+
+      std::memcpy(encoded_value.data() + POINT_LENGTH_BYTES, &value,
+                  value_length);
+
+      database.insert("cli", key, encoded_value);
       std::cout << (std::format("inserted: {}, {}", key, value)) << std::endl;
       ;
     } else if (operation == "c") {

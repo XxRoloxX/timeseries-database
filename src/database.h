@@ -27,6 +27,4 @@ private:
   std::vector<IndexedSSTableReader> indexed_readers;
   void compact_tables();
   void load_indexed_tables();
-  // std::vector<DataPoint> merge_points(std::vector<DataPoint> *a,
-  //                                   std::vector<DataPoint> *b);
 };

@@ -34,7 +34,14 @@ void StdLogger::error(std::string msg) {
 
   log_file.open(LOG_PATH, std::ios_base::app);
 
-  auto log = std::format("[{}] ERROR {}", ctime(&timestamp), msg);
+  struct tm *p = localtime(&timestamp);
 
+  char s[1000];
+
+  strftime(s, sizeof s, "%B %d %Y %H\:%M", p);
+
+  auto log = std::format("\033[1;32m[{}] ERROR\033[0m {}", s, msg);
+
+  log_file << log << std::endl;
   log_file.close();
 }

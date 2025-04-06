@@ -7,7 +7,6 @@
 #include <filesystem>
 #include <fstream>
 #include <memory>
-#include <utility>
 
 StorageManager::StorageManager(
     std::shared_ptr<Logger> logger, std::shared_ptr<Decoder> decoder,
@@ -258,6 +257,10 @@ void StorageManager::compact_tables(IndexedSSTableReader table_a,
 
     new_table.append_save(encoded_points, encoded_indexes);
   }
+
+  this->logger->info(std::format("Compacted {} and {} into {}",
+                                 table_a.get_name(), table_b.get_name(),
+                                 new_table.get_name()));
 
   table_a.remove();
   table_b.remove();
