@@ -4,6 +4,7 @@
 #include "./utils.h"
 #include "database.h"
 #include "datapoints/data_point.h"
+#include "typed_series/typed_series.h"
 #include <iostream>
 #include <memory>
 #include <unistd.h>
@@ -29,8 +30,10 @@ int main() {
       std::make_shared<StorageManager>(logger, decoder, encoder, cache,
                                        ss_table_writer, "storage");
 
-  Database database(logger, decoder, encoder, 3, ss_table_writer,
-                    storage_manager);
+  std::shared_ptr<Database> database = std::make_shared<Database>(
+      logger, decoder, encoder, 3, ss_table_writer, storage_manager);
+
+  TypedSeries<int> int_series("typed_test", database);
 
   for (std::string line; std::getline(std::cin, line);) {
     auto tokens = split(line, " ");
@@ -49,7 +52,7 @@ int main() {
 
       auto key = stoi(tokens[1], 0, 10);
       auto value = stoi(tokens[2], 0, 10);
-      auto read_points = database.read("cli", key, value);
+      auto read_points = int_series.read(key, value);
 
       std::cout << std::format("reading: {}-{}", key, value) << std::endl;
 
@@ -66,17 +69,7 @@ int main() {
       auto key = stoi(tokens[1], 0, 10);
       int value = stoi(tokens[2], 0, 10);
 
-      auto value_length = sizeof(int);
-
-      EncodedBuffer encoded_value(POINT_LENGTH_BYTES + value_length);
-
-      std::memcpy(encoded_value.data(), &value_length,
-                  sizeof(POINT_LENGTH_BYTES));
-
-      std::memcpy(encoded_value.data() + POINT_LENGTH_BYTES, &value,
-                  value_length);
-
-      database.insert("cli", key, encoded_value);
+      int_series.insert(key, value);
       std::cout << (std::format("inserted: {}, {}", key, value)) << std::endl;
       ;
     } else if (operation == "c") {
