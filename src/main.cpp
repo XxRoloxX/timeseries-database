@@ -20,7 +20,7 @@ int main() {
       DataPoint(20, std::vector<char>{19}),
       DataPoint(21, std::vector<char>{19}),
   };
-  auto indexer = std::make_shared<SSTableIndexer>(logger, decoder, encoder);
+  auto indexer = std::make_shared<SSTableIndexer>(logger, decoder, encoder, 2);
 
   std::shared_ptr<WriteBackCache<DataPointKey, DataPoint>> cache =
       std::make_shared<MemTable<DataPointKey, DataPoint>>(logger);

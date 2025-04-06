@@ -13,11 +13,12 @@ private:
   std::shared_ptr<Logger> logger;
   std::shared_ptr<Decoder> decoder;
   std::shared_ptr<Encoder> encoder;
+  int ratio;
 
 public:
   SSTableIndexer(std::shared_ptr<Logger> logger,
                  std::shared_ptr<Decoder> decoder,
-                 std::shared_ptr<Encoder> encoder);
+                 std::shared_ptr<Encoder> encoder, int ratio);
 
   ~SSTableIndexer();
 

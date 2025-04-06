@@ -10,13 +10,18 @@ IndexesMetadataBlock SSTableIndexer::create_indexes(
 
   size_t current_offset = 0;
 
-  for (auto &datapoint : *datapoints) {
-    auto encoded_datapoint =
-        this->encoder->encode(std::make_shared<DataPoint>(datapoint));
+  for (int i = 0; i < datapoints->size(); i++) {
 
-    indexes->push_back(IndexMapping{.key = datapoint.get_key(),
-                                    .offset = current_offset,
-                                    .length = encoded_datapoint.size()});
+    auto encoded_datapoint =
+        this->encoder->encode(std::make_shared<DataPoint>(datapoints->at(i)));
+
+    // If index is neither last nor first we check the ratio.
+    if (i == 0 || i == (datapoints->size() - 1) || i % ratio == 0) {
+
+      indexes->push_back(IndexMapping{.key = datapoints->at(i).get_key(),
+                                      .offset = current_offset,
+                                      .length = encoded_datapoint.size()});
+    }
 
     current_offset += encoded_datapoint.size();
   }
@@ -26,7 +31,7 @@ IndexesMetadataBlock SSTableIndexer::create_indexes(
 
 SSTableIndexer::SSTableIndexer(std::shared_ptr<Logger> logger,
                                std::shared_ptr<Decoder> decoder,
-                               std::shared_ptr<Encoder> encoder)
-    : logger(logger), decoder(decoder), encoder(encoder) {}
+                               std::shared_ptr<Encoder> encoder, int ratio)
+    : logger(logger), decoder(decoder), encoder(encoder), ratio(ratio) {}
 
 SSTableIndexer::~SSTableIndexer() = default;

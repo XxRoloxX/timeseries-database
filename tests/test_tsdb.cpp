@@ -30,18 +30,17 @@ std::vector<DataPoint> test_read_index(DataPointKey start_key,
 
   };
 
-  auto ss_table_writer =
-      std::make_shared<SSTableIndexer>(logger, decoder, encoder);
+  auto indexer = std::make_shared<SSTableIndexer>(logger, decoder, encoder, 2);
 
   std::shared_ptr<WriteBackCache<DataPointKey, DataPoint>> cache =
       std::make_shared<MemTable<DataPointKey, DataPoint>>(logger);
 
   std::shared_ptr<StorageManager> storage_manager =
-      std::make_shared<StorageManager>(logger, decoder, encoder, cache,
-                                       ss_table_writer, "test_storage");
+      std::make_shared<StorageManager>(logger, decoder, encoder, cache, indexer,
+                                       "test_storage");
 
   Database database =
-      Database(logger, decoder, encoder, 3, ss_table_writer, storage_manager);
+      Database(logger, decoder, encoder, 3, indexer, storage_manager);
 
   for (auto point : data) {
     database.insert("test_series", point.get_key(), point.get_value());
