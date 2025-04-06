@@ -7,6 +7,8 @@ IndexedSSTableReader::IndexedSSTableReader(
     std::shared_ptr<Logger> logger, std::shared_ptr<SSTableStorage> raw_table,
     std::shared_ptr<Decoder> decoder, std::shared_ptr<Encoder> encoder)
     : logger(logger), raw_table(raw_table), decoder(decoder), encoder(encoder) {
+
+  indexes = std::make_shared<IndexesMetadataBlock>();
 }
 
 IndexedSSTableReader::~IndexedSSTableReader() = default;
@@ -15,25 +17,18 @@ void IndexedSSTableReader::initialize() {
 
   this->raw_table->initialize();
 
-  this->name = this->raw_table->get_name();
-
   auto raw_indexes = this->raw_table->get_indexes();
-  // this->logger->info(
-  //     std::format("RAW INDEXES: {}", encoded_buffer_to_string(raw_indexes)));
 
-  this->indexes.decode(*raw_indexes);
+  this->indexes->decode(*raw_indexes);
 
-  this->logger->info(std::format("initialized ss_table: {}", this->name));
+  this->logger->info(
+      std::format("initialized ss_table: {}", this->raw_table->get_name()));
 }
 
 std::shared_ptr<std::vector<DataPoint>>
 IndexedSSTableReader::read_range(DataPointKey start_key, DataPointKey end_key) {
 
-  auto results = this->indexes.index_range(start_key, end_key);
-
-  // this->logger->info(std::format("results: start: {}, end: {}",
-  //                                results.start_byte_offset,
-  //                                results.end_byte_offset));
+  auto results = this->indexes->index_range(start_key, end_key);
 
   try {
     auto datapoints_result = this->raw_table->read_range(
@@ -62,6 +57,13 @@ std::shared_ptr<std::vector<DataPoint>> IndexedSSTableReader::read_all() {
 
   return std::make_shared<std::vector<DataPoint>>(decoded_points);
 }
-// std::shared_ptr<std::vector<DataPoint>> IndexedSSTableReader::get_data() {
-//   return std::make_shared<std::vector<DataPoint>>(this->data);
-// }
+
+std::shared_ptr<IndexesMetadataBlock> IndexedSSTableReader::get_indexes() {
+  return this->indexes;
+}
+
+std::string IndexedSSTableReader::get_series() {
+  return this->raw_table->get_series();
+}
+
+void IndexedSSTableReader::remove() { this->raw_table->remove(); }

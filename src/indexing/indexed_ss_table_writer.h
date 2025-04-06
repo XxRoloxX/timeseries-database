@@ -4,6 +4,7 @@
 #include "../encoding/decoder.h"
 #include "../encoding/encoder.h"
 #include "../logger/logger.h"
+#include "./indexes_block.h"
 #include <memory>
 #include <vector>
 
@@ -20,6 +21,9 @@ public:
 
   ~IndexedSSTableWriter();
 
-  void save(std::string name,
-            std::shared_ptr<std::vector<DataPoint>> datapoints);
+  // void save(std::string name,
+  //           std::shared_ptr<std::vector<DataPoint>> datapoints);
+
+  IndexesMetadataBlock
+  create_indexes(std::shared_ptr<std::vector<DataPoint>> datapoints);
 };

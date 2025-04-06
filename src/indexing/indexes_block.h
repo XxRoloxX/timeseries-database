@@ -21,13 +21,17 @@ struct IndexResult {
 
 class IndexesMetadataBlock {
 private:
-  std::vector<IndexMapping> indexes;
+  std::shared_ptr<std::vector<IndexMapping>> indexes;
 
 public:
-  IndexesMetadataBlock(std::vector<IndexMapping> mappings);
+  IndexesMetadataBlock(std::shared_ptr<std::vector<IndexMapping>> mappings);
   IndexesMetadataBlock();
   void decode(EncodedBuffer &data);
   std::vector<char> encode();
   std::size_t size();
   IndexResult index_range(DataPointKey start_key, DataPointKey end_key);
+  std::shared_ptr<std::vector<IndexMapping>> get_ordered_indexes();
+  IndexMapping last_index();
+  IndexMapping first_index();
+  void operator=(const IndexesMetadataBlock &);
 };
