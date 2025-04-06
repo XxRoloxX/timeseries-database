@@ -5,7 +5,7 @@
 
 #include "../src/database.h"
 #include "../src/encoding/binary_encoder.h"
-#include "../src/indexing/indexed_ss_table_writer.h"
+#include "../src/indexing/ss_table_indexer.h"
 #include "../src/storage/storage_manager.h"
 
 std::vector<DataPoint> test_read_index(DataPointKey start_key,
@@ -31,7 +31,7 @@ std::vector<DataPoint> test_read_index(DataPointKey start_key,
   };
 
   auto ss_table_writer =
-      std::make_shared<IndexedSSTableWriter>(logger, decoder, encoder);
+      std::make_shared<SSTableIndexer>(logger, decoder, encoder);
 
   std::shared_ptr<WriteBackCache<DataPointKey, DataPoint>> cache =
       std::make_shared<MemTable<DataPointKey, DataPoint>>(logger);

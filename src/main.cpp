@@ -1,5 +1,5 @@
 #include "./encoding/binary_encoder.h"
-#include "./indexing/indexed_ss_table_writer.h"
+#include "./indexing/ss_table_indexer.h"
 #include "./storage/storage_manager.h"
 #include "./utils.h"
 #include "database.h"
@@ -20,18 +20,17 @@ int main() {
       DataPoint(20, std::vector<char>{19}),
       DataPoint(21, std::vector<char>{19}),
   };
-  auto ss_table_writer =
-      std::make_shared<IndexedSSTableWriter>(logger, decoder, encoder);
+  auto indexer = std::make_shared<SSTableIndexer>(logger, decoder, encoder);
 
   std::shared_ptr<WriteBackCache<DataPointKey, DataPoint>> cache =
       std::make_shared<MemTable<DataPointKey, DataPoint>>(logger);
 
   std::shared_ptr<StorageManager> storage_manager =
-      std::make_shared<StorageManager>(logger, decoder, encoder, cache,
-                                       ss_table_writer, "storage");
+      std::make_shared<StorageManager>(logger, decoder, encoder, cache, indexer,
+                                       "storage");
 
   std::shared_ptr<Database> database = std::make_shared<Database>(
-      logger, decoder, encoder, 3, ss_table_writer, storage_manager);
+      logger, decoder, encoder, 3, indexer, storage_manager);
 
   TypedSeries<int> int_series("typed_test_2", database);
 

@@ -1,8 +1,8 @@
-#include "./indexed_ss_table_writer.h"
+#include "./ss_table_indexer.h"
 #include "indexes_block.h"
 #include <memory>
 
-IndexesMetadataBlock IndexedSSTableWriter::create_indexes(
+IndexesMetadataBlock SSTableIndexer::create_indexes(
     std::shared_ptr<std::vector<DataPoint>> datapoints) {
 
   std::shared_ptr<std::vector<IndexMapping>> indexes =
@@ -24,9 +24,9 @@ IndexesMetadataBlock IndexedSSTableWriter::create_indexes(
   return IndexesMetadataBlock(indexes);
 }
 
-IndexedSSTableWriter::IndexedSSTableWriter(std::shared_ptr<Logger> logger,
-                                           std::shared_ptr<Decoder> decoder,
-                                           std::shared_ptr<Encoder> encoder)
+SSTableIndexer::SSTableIndexer(std::shared_ptr<Logger> logger,
+                               std::shared_ptr<Decoder> decoder,
+                               std::shared_ptr<Encoder> encoder)
     : logger(logger), decoder(decoder), encoder(encoder) {}
 
-IndexedSSTableWriter::~IndexedSSTableWriter() = default;
+SSTableIndexer::~SSTableIndexer() = default;

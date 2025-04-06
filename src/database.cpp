@@ -5,8 +5,6 @@
 #include <memory>
 #include <string>
 
-using std::move;
-
 void Database::insert(std::string series_name, DataPointKey key,
                       DataPointValue value) {
 
@@ -19,7 +17,7 @@ void Database::insert(std::string series_name, DataPointKey key,
     auto cache_contents =
         std::make_shared<std::vector<DataPoint>>(cache->get_all(series_name));
 
-    auto indexes = this->ss_writer->create_indexes(cache_contents);
+    auto indexes = this->indexer->create_indexes(cache_contents);
 
     this->storage_manager->add_table(series_name, cache_contents, indexes);
     this->storage_manager->clear_cache(series_name);
@@ -77,10 +75,10 @@ Database::~Database() {}
 Database::Database(std::shared_ptr<Logger> logger,
                    std::shared_ptr<Decoder> decoder,
                    std::shared_ptr<Encoder> encoder, size_t memtable_size,
-                   std::shared_ptr<IndexedSSTableWriter> ss_writer,
+                   std::shared_ptr<SSTableIndexer> indexer,
                    std::shared_ptr<StorageManager> storage_manager)
     : memtable_size(memtable_size), decoder(decoder), encoder(encoder),
-      logger(logger), ss_writer(ss_writer), storage_manager(storage_manager) {
+      logger(logger), indexer(indexer), storage_manager(storage_manager) {
 
   this->load_indexed_tables();
 }

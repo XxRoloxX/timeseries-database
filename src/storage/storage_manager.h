@@ -5,8 +5,8 @@
 #include "../encoding/decoder.h"
 #include "../encoding/encoder.h"
 #include "../indexing/indexed_ss_table_reader.h"
-#include "../indexing/indexed_ss_table_writer.h"
 #include "../indexing/indexes_block.h"
+#include "../indexing/ss_table_indexer.h"
 #include "./ss_table_storage.h"
 #include <string>
 #include <vector>
@@ -22,7 +22,7 @@ private:
   std::shared_ptr<Logger> logger;
   std::shared_ptr<Decoder> decoder;
   std::shared_ptr<Encoder> encoder;
-  std::shared_ptr<IndexedSSTableWriter> ss_writer;
+  std::shared_ptr<SSTableIndexer> indexer;
   std::string get_storage_path(std::string table_name);
   void load_tables();
   void load_cache();
@@ -39,7 +39,7 @@ public:
                  std::shared_ptr<Decoder> decoder,
                  std::shared_ptr<Encoder> encoder,
                  std::shared_ptr<WriteBackCache<DataPointKey, DataPoint>> cache,
-                 std::shared_ptr<IndexedSSTableWriter> ss_writer,
+                 std::shared_ptr<SSTableIndexer> ss_writer,
                  std::string base_path);
   ~StorageManager();
   std::vector<std::shared_ptr<SSTableStorage>> get_tables();

@@ -12,9 +12,9 @@ StorageManager::StorageManager(
     std::shared_ptr<Logger> logger, std::shared_ptr<Decoder> decoder,
     std::shared_ptr<Encoder> encoder,
     std::shared_ptr<WriteBackCache<DataPointKey, DataPoint>> cache,
-    std::shared_ptr<IndexedSSTableWriter> ss_writer, std::string base_path)
+    std::shared_ptr<SSTableIndexer> indexer, std::string base_path)
     : base_path(base_path), cache(cache), logger(logger), decoder(decoder),
-      encoder(encoder), ss_writer(ss_writer) {
+      encoder(encoder), indexer(indexer) {
 
   this->load_tables();
   this->load_cache();
@@ -261,7 +261,7 @@ void StorageManager::compact_tables(IndexedSSTableReader table_a,
     auto merged_points = std::make_shared<std::vector<DataPoint>>(
         merge_points(&(*points_a), &(*points_b)));
 
-    auto new_indexes = this->ss_writer->create_indexes(merged_points);
+    auto new_indexes = this->indexer->create_indexes(merged_points);
 
     current_index.key += batch_size;
 

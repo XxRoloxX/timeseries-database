@@ -8,21 +8,18 @@
 #include <memory>
 #include <vector>
 
-class IndexedSSTableWriter {
+class SSTableIndexer {
 private:
   std::shared_ptr<Logger> logger;
   std::shared_ptr<Decoder> decoder;
   std::shared_ptr<Encoder> encoder;
 
 public:
-  IndexedSSTableWriter(std::shared_ptr<Logger> logger,
-                       std::shared_ptr<Decoder> decoder,
-                       std::shared_ptr<Encoder> encoder);
+  SSTableIndexer(std::shared_ptr<Logger> logger,
+                 std::shared_ptr<Decoder> decoder,
+                 std::shared_ptr<Encoder> encoder);
 
-  ~IndexedSSTableWriter();
-
-  // void save(std::string name,
-  //           std::shared_ptr<std::vector<DataPoint>> datapoints);
+  ~SSTableIndexer();
 
   IndexesMetadataBlock
   create_indexes(std::shared_ptr<std::vector<DataPoint>> datapoints);
