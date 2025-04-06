@@ -15,29 +15,30 @@ void Database::insert(std::string series_name, DataPointKey key,
 
   auto cache = this->storage_manager->get_cache();
 
-  if (cache->size() >= this->memtable_size) {
+  if (cache->size(series_name) >= this->memtable_size) {
     auto cache_contents =
-        std::make_shared<std::vector<DataPoint>>(cache->get_all());
+        std::make_shared<std::vector<DataPoint>>(cache->get_all(series_name));
 
     auto indexes = this->ss_writer->create_indexes(cache_contents);
 
     this->storage_manager->add_table(series_name, cache_contents, indexes);
-    this->storage_manager->clear_cache();
+    this->storage_manager->clear_cache(series_name);
     this->storage_manager->reload_tables();
     this->load_indexed_tables();
 
     // TODO remove after tests
-    this->compact_tables();
+    this->compact_tables(series_name);
   }
 
-  cache->set(key, DataPoint(key, value));
+  cache->set(series_name, key, DataPoint(key, value));
 }
 
-void Database::compact_tables() {
+void Database::compact_tables(std::string series) {
 
-  if (indexed_readers.size() > 1) {
-    this->storage_manager->compact_tables(this->indexed_readers.at(0),
-                                          this->indexed_readers.at(1));
+  auto tables = this->tables_for_series(series);
+
+  if (tables.size() > 1) {
+    this->storage_manager->compact_tables(tables.at(0), tables.at(1));
   }
 
   this->storage_manager->reload_tables();
@@ -64,7 +65,7 @@ std::vector<DataPoint> Database::read(std::string series_name,
   }
 
   auto from_memtable =
-      this->storage_manager->get_cache()->get_range(start, end);
+      this->storage_manager->get_cache()->get_range(series_name, start, end);
 
   points = merge_points(&points, &from_memtable);
 
@@ -98,4 +99,17 @@ void Database::load_indexed_tables() {
 
     this->indexed_readers.push_back(reader);
   }
+}
+
+std::vector<IndexedSSTableReader>
+Database::tables_for_series(std::string series) {
+
+  std::vector<IndexedSSTableReader> filtered_tables;
+  for (auto &reader : this->indexed_readers) {
+    if (reader.get_series() == series) {
+      filtered_tables.push_back(reader);
+    }
+  }
+
+  return filtered_tables;
 }

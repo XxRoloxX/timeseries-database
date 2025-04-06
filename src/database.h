@@ -25,6 +25,7 @@ private:
   std::shared_ptr<IndexedSSTableWriter> ss_writer;
   std::shared_ptr<StorageManager> storage_manager;
   std::vector<IndexedSSTableReader> indexed_readers;
-  void compact_tables();
+  void compact_tables(std::string series);
   void load_indexed_tables();
+  std::vector<IndexedSSTableReader> tables_for_series(std::string series);
 };

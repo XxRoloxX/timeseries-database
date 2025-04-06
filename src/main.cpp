@@ -33,7 +33,7 @@ int main() {
   std::shared_ptr<Database> database = std::make_shared<Database>(
       logger, decoder, encoder, 3, ss_table_writer, storage_manager);
 
-  TypedSeries<int> int_series("typed_test", database);
+  TypedSeries<int> int_series("typed_test_2", database);
 
   for (std::string line; std::getline(std::cin, line);) {
     auto tokens = split(line, " ");
@@ -74,7 +74,7 @@ int main() {
       ;
     } else if (operation == "c") {
 
-      auto read_points = cache->get_all();
+      auto read_points = cache->get_all("typed_test");
       std::cout << "cache contents: " << std::endl;
 
       for (auto &point : read_points) {

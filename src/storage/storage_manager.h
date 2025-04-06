@@ -31,6 +31,8 @@ private:
   void append_to_table(std::string series, std::string table_name,
                        std::shared_ptr<std::vector<DataPoint>> points,
                        IndexesMetadataBlock indexes);
+  std::string get_cache_path(std::string series);
+  std::string get_cache_dir();
 
 public:
   StorageManager(std::shared_ptr<Logger> logger,
@@ -50,6 +52,6 @@ public:
                       IndexedSSTableReader table_b);
 
   void reload_tables();
-  void clear_cache();
-  void save_cache();
+  void clear_cache(std::string series);
+  void save_cache(std::string series);
 };

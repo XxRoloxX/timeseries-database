@@ -50,58 +50,63 @@ void StorageManager::load_tables() {
 
 void StorageManager::load_cache() {
 
-  if (!std::filesystem::is_directory(this->base_path)) {
-    this->logger->info(std::format(
-        "No storage path, skipping loading tables: {}", this->base_path));
+  if (!std::filesystem::is_directory(this->get_cache_dir())) {
+    this->logger->info(
+        std::format("No cache storage path, skipping loading tables: {}",
+                    this->get_cache_dir()));
     return;
   }
 
-  if (!std::filesystem::exists(this->get_storage_path(CACHE_PATH))) {
-    return;
+  for (auto &path :
+       std::filesystem::directory_iterator(this->get_cache_dir())) {
+
+    auto series = path.path().filename();
+
+    std::ifstream file(this->get_cache_path(series),
+                       std::ios::in | std::ofstream::binary);
+
+    if (!file) {
+      this->logger->error("failed to read cache file at: " +
+                          this->get_cache_path(series));
+      throw std::filesystem::filesystem_error(
+          "file not found: ",
+          std::make_error_code(std::errc::no_such_file_or_directory));
+    }
+
+    file.seekg(0, std::ios::end);
+
+    auto end_pos = file.tellg();
+
+    file.seekg(0, std::ios::beg);
+
+    std::streamsize size = end_pos;
+
+    std::shared_ptr<EncodedBuffer> file_data =
+        std::make_shared<EncodedBuffer>();
+    file_data->resize(size);
+
+    if (!file.read(file_data->data(), size)) {
+      this->logger->error("failed to load table from file");
+    }
+
+    auto points = this->decoder->decode_many(file_data);
+
+    this->logger->info(
+        std::format("reading {} points from cache", points.size()));
+
+    for (auto &point : points) {
+      cache->set(series, point.get_key(), point);
+    }
+
+    file.close();
   }
-
-  std::ifstream file(this->get_storage_path(CACHE_PATH),
-                     std::ios::in | std::ofstream::binary);
-
-  if (!file) {
-    this->logger->error("failed to read cache file at: " +
-                        this->get_storage_path(CACHE_PATH));
-    throw std::filesystem::filesystem_error(
-        "file not found: ",
-        std::make_error_code(std::errc::no_such_file_or_directory));
-  }
-
-  file.seekg(0, std::ios::end);
-
-  auto end_pos = file.tellg();
-
-  file.seekg(0, std::ios::beg);
-
-  std::streamsize size = end_pos;
-
-  std::shared_ptr<EncodedBuffer> file_data = std::make_shared<EncodedBuffer>();
-  file_data->resize(size);
-
-  if (!file.read(file_data->data(), size)) {
-    this->logger->error("failed to load table from file");
-  }
-
-  auto points = this->decoder->decode_many(file_data);
-
-  this->logger->info(
-      std::format("reading {} points from cache", points.size()));
-
-  for (auto &point : points) {
-    cache->set(point.get_key(), point);
-  }
-
-  file.close();
 };
 
-void StorageManager::clear_cache() {
-  auto size = this->cache->purge();
-  this->logger->info(std::format("purged {} elements from cache", size));
-  std::filesystem::remove(this->get_storage_path(CACHE_PATH));
+void StorageManager::clear_cache(std::string series) {
+  auto size = this->cache->purge(series);
+  this->logger->info(
+      std::format("purged {} elements from {} cache", series, size));
+  std::filesystem::remove(this->get_cache_path(series));
 }
 
 void StorageManager::reload_tables() {
@@ -118,10 +123,10 @@ StorageManager::get_cache() {
   return cache;
 }
 
-void StorageManager::save_cache() {
+void StorageManager::save_cache(std::string series) {
 
   std::shared_ptr<std::vector<DataPoint>> points =
-      std::make_shared<std::vector<DataPoint>>(this->cache->get_all());
+      std::make_shared<std::vector<DataPoint>>(this->cache->get_all(series));
 
   this->logger->info(std::format("saving {} points to cache", points->size()));
 
@@ -131,7 +136,11 @@ void StorageManager::save_cache() {
     std::filesystem::create_directory(this->base_path);
   }
 
-  std::ofstream file(this->get_storage_path(CACHE_PATH),
+  if (!std::filesystem::is_directory(this->get_cache_dir())) {
+    std::filesystem::create_directory(this->get_cache_dir());
+  }
+
+  std::ofstream file(this->get_cache_path(series),
                      std::ios::out | std::ofstream::binary);
 
   if (!file) {
@@ -203,6 +212,10 @@ std::string StorageManager::get_storage_path(std::string table_name) {
   return this->base_path + "/" + table_name;
 };
 
+std::string StorageManager::get_cache_path(std::string series) {
+  return this->get_cache_dir() + "/" + series;
+};
+
 void StorageManager::compact_tables(IndexedSSTableReader table_a,
                                     IndexedSSTableReader table_b) {
 
@@ -268,7 +281,17 @@ void StorageManager::compact_tables(IndexedSSTableReader table_a,
   this->reload_tables();
 }
 
-StorageManager::~StorageManager() { this->save_cache(); }
+std::string StorageManager::get_cache_dir() {
+  return this->base_path + "/" + CACHE_PATH;
+}
+
+StorageManager::~StorageManager() {
+
+  std::vector<std::string> all_series = this->cache->get_series();
+  for (std::string &series : all_series) {
+    this->save_cache(series);
+  }
+}
 
 std::string StorageManager::get_series_from_table_name(std::string name) {
   auto splitted_path = split(name, "-");
