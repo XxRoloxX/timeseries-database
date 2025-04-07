@@ -23,6 +23,15 @@ std::vector<DataPoint> merge_points(std::vector<DataPoint> *a,
                                     std::vector<DataPoint> *b) {
 
   std::vector<DataPoint> result;
+
+  if (a->size() == 0) {
+    return *b;
+  }
+
+  if (b->size() == 0) {
+    return *a;
+  }
+
   size_t a_index = 0;
   size_t b_index = 0;
 

@@ -34,20 +34,25 @@ find_closest_index(std::shared_ptr<std::vector<IndexMapping>> elements,
     iter = -1;
   }
 
+  auto curr_element = elements->at(start_index);
+  auto prev_element = elements->at(start_index);
+
   for (int i = start_index; i * iter <= last_index * iter; i += iter) {
-    auto curr_element = elements->at(i);
 
     if (curr_element.key == searched_value) {
       return curr_element;
     }
 
     if (!from_right && curr_element.key > searched_value) {
-      return curr_element;
+      return prev_element;
     }
 
     if (from_right && curr_element.key < searched_value) {
-      return curr_element;
+      return prev_element;
     }
+
+    prev_element = curr_element;
+    curr_element = elements->at(i);
   }
 
   return {};

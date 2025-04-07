@@ -34,6 +34,8 @@ IndexedSSTableReader::read_range(DataPointKey start_key, DataPointKey end_key) {
 
   auto results = this->indexes->index_range(start_key, end_key);
 
+  std::vector<DataPoint> filtered_datapoints;
+
   try {
     auto datapoints_result = this->raw_table->read_range(
         results.start_byte_offset, results.end_byte_offset);
@@ -41,11 +43,14 @@ IndexedSSTableReader::read_range(DataPointKey start_key, DataPointKey end_key) {
     std::vector<DataPoint> datapoints =
         this->decoder->decode_many(datapoints_result);
 
-    for (auto &point : datapoints) {
-      this->logger->info(point.to_string());
+    for (DataPoint &point : datapoints) {
+      if (point.get_key() >= start_key && point.get_key() <= end_key) {
+        filtered_datapoints.push_back(point);
+        this->logger->info(point.to_string());
+      }
     }
 
-    return std::make_shared<std::vector<DataPoint>>(datapoints);
+    return std::make_shared<std::vector<DataPoint>>(filtered_datapoints);
   } catch (const std::runtime_error &err) {
     this->logger->error(std::format("{} failed to read range from: {}-{}]",
                                     err.what(), results.start_byte_offset,
