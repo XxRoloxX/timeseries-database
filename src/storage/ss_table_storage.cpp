@@ -1,5 +1,6 @@
 #include "../storage/ss_table_storage.h"
 #include "../logger/logger.h"
+#include <cstring>
 #include <filesystem>
 #include <format>
 #include <fstream>
@@ -73,17 +74,6 @@ std::shared_ptr<EncodedBuffer> SSTableStorage::read_all() {
   return std::make_shared<EncodedBuffer>(file_data);
 }
 
-void SSTableStorage::load(EncodedBuffer *raw) {
-
-  // We start reading the blob with metadata block.
-  auto _ = metadata.load(raw);
-
-  std::vector<char> new_indices(
-      raw->begin() + metadata.get_indexes_block_offset(), raw->end());
-
-  this->indices = std::move(new_indices);
-}
-
 void SSTableStorage::save() {
 
   if (!std::filesystem::is_directory(this->base_path)) {
@@ -101,7 +91,9 @@ void SSTableStorage::save() {
 
   // We are assuming here that whole table was loaded to the memory, and
   // contents are in this->data (done when saving to disk for the first time)
-  this->update_metadata(this->data.size());
+  // this->update_metadata(this->data.size());
+  this->metadata.set_indexes_block_offset(
+      INDEXES_METADATA_BLOCK_OFFSET_LENGTH_BYTES + this->data.size());
 
   EncodedBuffer encoded_metadata = this->metadata.encode();
   file.write(encoded_metadata.data(), encoded_metadata.size());
@@ -163,9 +155,8 @@ void SSTableStorage::append_save(EncodedBuffer new_data,
                                  this->name));
 };
 
-void SSTableStorage::update_metadata(size_t data_size) {
-  this->metadata.set_indexes_block_offset(
-      data_size + INDEXES_METADATA_BLOCK_OFFSET_LENGTH_BYTES);
+void SSTableStorage::update_metadata(size_t indexes_offset) {
+  this->metadata.set_indexes_block_offset(indexes_offset);
 }
 
 void SSTableStorage::initialize() {
@@ -183,22 +174,33 @@ void SSTableStorage::initialize() {
     return;
   }
 
-  // TODO: REMOVE TO NOT LOAD WHOLE FILE, AS the table raw data is not needed in
-  // memory
-  file.seekg(0, std::ios::end);
-  std::streamsize size = file.tellg();
-
-  this->logger->info(std::format("reading file of size: {}", size));
   file.seekg(0, std::ios::beg);
 
-  this->data.resize(size);
-
-  EncodedBuffer file_data(size);
-  if (!file.read(file_data.data(), size)) {
+  EncodedBuffer file_data(INDEXES_METADATA_BLOCK_OFFSET_LENGTH_BYTES);
+  if (!file.read(file_data.data(),
+                 INDEXES_METADATA_BLOCK_OFFSET_LENGTH_BYTES)) {
     this->logger->error("failed to load table from file");
   }
 
-  this->load(&file_data);
+  int indexes_offset;
+
+  std::memcpy(&indexes_offset, file_data.data(),
+              INDEXES_METADATA_BLOCK_OFFSET_LENGTH_BYTES);
+
+  this->update_metadata(indexes_offset);
+
+  file.seekg(0, std::ios::end);
+
+  auto file_size = file.tellg();
+
+  file.seekg(indexes_offset, std::ios::beg);
+
+  EncodedBuffer indexes(size_t(file_size) - indexes_offset);
+  if (!file.read(indexes.data(), indexes.size())) {
+    this->logger->error("failed to load table from file");
+  }
+
+  this->set_indexes(indexes);
 
   this->logger->info(std::format("initialized table {}", this->name));
 }

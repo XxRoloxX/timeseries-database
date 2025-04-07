@@ -14,8 +14,6 @@ private:
   std::string name;
   std::string series;
   MetadataBlock metadata;
-
-  void load(EncodedBuffer *raw);
   std::string get_path();
   std::string base_path;
 
@@ -27,7 +25,6 @@ public:
                                             std::size_t end_byte);
 
   std::shared_ptr<EncodedBuffer> read_all();
-  // void merge_with(std::shared_ptr<SSTableStorage> table) {};
   void set_data(EncodedBuffer data);
   void set_indexes(EncodedBuffer indexes);
   void update_metadata(size_t data_size);
