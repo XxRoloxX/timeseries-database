@@ -34,6 +34,8 @@ std::shared_ptr<EncodedBuffer> SSTableStorage::read_range(std::size_t startByte,
 
   std::streamsize size = endByte - startByte;
 
+  this->logger->info(std::format("reading range: {}-{}", startByte, size));
+
   this->logger->info(
       std::format("reading {} bytes from {} storage", size, this->name));
 

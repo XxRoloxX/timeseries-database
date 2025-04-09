@@ -24,7 +24,6 @@ void Database::insert(std::string series_name, DataPointKey key,
     this->storage_manager->reload_tables();
     this->load_indexed_tables();
 
-    // TODO remove after tests
     this->compact_tables(series_name);
   }
 

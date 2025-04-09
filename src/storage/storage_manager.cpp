@@ -7,6 +7,7 @@
 #include <filesystem>
 #include <fstream>
 #include <memory>
+#include <random>
 
 StorageManager::StorageManager(
     std::shared_ptr<Logger> logger, std::shared_ptr<Decoder> decoder,
@@ -163,7 +164,15 @@ std::string StorageManager::create_table_name(std::string series_name) {
   auto milliseconds =
       std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
 
-  return std::format("{}-{}", series_name, milliseconds);
+  std::string str(
+      "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
+
+  std::random_device rd;
+  std::mt19937 generator(rd());
+
+  std::shuffle(str.begin(), str.end(), generator);
+
+  return std::format("{}-{}-{}", series_name, milliseconds, str.substr(0, 32));
 }
 
 void StorageManager::add_table(std::string series,
@@ -248,6 +257,9 @@ void StorageManager::compact_tables(IndexedSSTableReader table_a,
   SSTableStorage new_table(this->logger, this->base_path,
                            this->create_table_name(table_a.get_series()),
                            table_a.get_series());
+
+  this->logger->info(std::format("Compacting from {} to {}", smallest_index.key,
+                                 biggest_index.key));
 
   while (current_index.key <= biggest_index.key) {
     std::vector<DataPoint> batch_points;
