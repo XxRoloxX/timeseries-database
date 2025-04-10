@@ -4,6 +4,7 @@
 #include "./utils.h"
 #include "database.h"
 #include "datapoints/data_point.h"
+#include "query/parser.h"
 #include "server/server.h"
 #include "typed_series/typed_series.h"
 #include <csignal>
@@ -12,8 +13,15 @@
 #include <unistd.h>
 
 int main() {
-  std::shared_ptr<Decoder> decoder = std::make_shared<DataPointDecoder>();
-  std::shared_ptr<Encoder> encoder = std::make_shared<DataPointEncoder>();
+  std::shared_ptr<Decoder> decoder = std::make_shared<BinaryDataPointDecoder>();
+  std::shared_ptr<Encoder> encoder = std::make_shared<BinaryDataPointEncoder>();
+  std::unordered_map<DataType, std::shared_ptr<Encoder>> response_encoders = {
+      {DataType::INT,
+       std::make_shared<PlaintextDataPointEncoder>(DataType::INT)},
+      {DataType::FLOAT,
+       std::make_shared<PlaintextDataPointEncoder>(DataType::FLOAT)},
+      {DataType::BINARY,
+       std::make_shared<PlaintextDataPointEncoder>(DataType::BINARY)}};
 
   std::shared_ptr<Logger> logger = std::make_shared<StdLogger>();
 
@@ -33,7 +41,11 @@ int main() {
   std::shared_ptr<Database> database = std::make_shared<Database>(
       logger, decoder, encoder, 150, indexer, storage_manager);
 
-  TcpServer server(logger, database, 9001, 1000);
+  std::shared_ptr<QueryParser> query_parser =
+      std::make_shared<PlaintextQueryParser>(logger);
+
+  TcpServer server(logger, database, query_parser, response_encoders, 9002,
+                   1000);
 
   server.initialize();
 

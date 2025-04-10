@@ -2,7 +2,6 @@
 #pragma once
 
 #include <format>
-#include <memory>
 #include <string>
 #include <vector>
 
@@ -24,13 +23,10 @@ class Encodable {
 public:
   virtual EncodedBuffer encode() = 0;
   virtual ~Encodable() = default;
-  // virtual void decode(EncodedBuffer data) = 0;
 };
 
 class Decodable {
 public:
   virtual void decode() = 0;
   virtual ~Decodable() = default;
-  ;
-  // virtual void decode(EncodedBuffer data) = 0;
 };

@@ -1,4 +1,6 @@
 #include "./datapoints/data_point.h"
+#include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -63,4 +65,32 @@ std::vector<DataPoint> merge_points(std::vector<DataPoint> *a,
   }
 
   return std::move(result);
+}
+
+std::string join(std::vector<std::string> elements) {
+
+  std::ostringstream os;
+  for (size_t i = 0; i < elements.size(); ++i) {
+    os << elements[i];
+  }
+
+  return os.str();
+}
+
+char *trim(char *buffer) {
+  if (!buffer)
+    return nullptr;
+
+  while (std::isspace(static_cast<unsigned char>(*buffer))) {
+    ++buffer;
+  }
+
+  char *end = buffer + std::strlen(buffer) - 1;
+  while (end > buffer && std::isspace(static_cast<unsigned char>(*end))) {
+    --end;
+  }
+
+  *(end + 1) = '\0';
+
+  return buffer;
 }

@@ -16,8 +16,8 @@ std::vector<DataPoint> test_read_index(DataPointKey start_key,
     std::filesystem::remove_all("./test_storage");
   }
 
-  std::shared_ptr<Decoder> decoder = std::make_shared<DataPointDecoder>();
-  std::shared_ptr<Encoder> encoder = std::make_shared<DataPointEncoder>();
+  std::shared_ptr<Decoder> decoder = std::make_shared<BinaryDataPointDecoder>();
+  std::shared_ptr<Encoder> encoder = std::make_shared<BinaryDataPointEncoder>();
   std::shared_ptr<Logger> logger = std::make_shared<StdLogger>();
 
   std::vector<DataPoint> data = {

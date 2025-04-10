@@ -5,24 +5,19 @@
 #include <cstdlib>
 #include <cstring>
 #include <netinet/in.h>
-#include <numbers>
 #include <stdexcept>
 #include <sys/select.h>
 #include <sys/socket.h>
 #include <unistd.h>
 #include <unordered_map>
 
-std::unordered_map<std::string, Operation> stringToOperationMap = {
-    {"r", Operation::READ},
-    {"i", Operation::INSERT},
-    {"q", Operation::QUIT},
-};
-
-TcpServer::TcpServer(std::shared_ptr<Logger> logger,
-                     std::shared_ptr<Database> database, int port,
-                     size_t buffer_size)
-    : port(port), buffer_size(buffer_size), logger(logger),
-      database(database) {};
+TcpServer::TcpServer(
+    std::shared_ptr<Logger> logger, std::shared_ptr<Database> database,
+    std::shared_ptr<QueryParser> query_parser,
+    std::unordered_map<DataType, std::shared_ptr<Encoder>> response_encoders,
+    int port, size_t buffer_size)
+    : port(port), buffer_size(buffer_size), logger(logger), database(database),
+      query_parser(query_parser), response_encoders(response_encoders) {};
 
 void TcpServer::initialize() {
 
@@ -49,12 +44,6 @@ void TcpServer::initialize() {
     this->logger->error("Failed to listen on the socket");
     exit(EXIT_FAILURE);
   }
-}
-
-void TcpServer::trim_buffer(std::string &buffer) {
-  buffer.erase(0, buffer.find_first_not_of(" \t\n\r"));
-
-  buffer.erase(buffer.find_last_not_of(" \t\n\r") + 1);
 }
 
 void TcpServer::listen() {
@@ -97,41 +86,19 @@ void TcpServer::listen() {
 
       int data_read = read(new_socket, buffer, this->buffer_size);
 
-      if (data_read == 0) {
+      auto trimmed_buf = trim(buffer);
+
+      if (data_read == 0 || trimmed_buf == nullptr) {
         this->logger->info("Connection was closed by client");
         timed_out = true;
       }
 
-      std::string line(buffer);
-
-      auto tokens = split(line, " ");
-      if (tokens.size() == 0) {
-        this->logger->error("Invalid empty command: " + line);
-        break;
-      }
-
-      Operation operation = Operation::INVALID;
-      auto it = stringToOperationMap.find(tokens[0]);
-      if (it != stringToOperationMap.end()) {
-        operation = it->second;
-      }
-
-      switch (operation) {
-      case Operation::READ:
-        this->handle_read(tokens, new_socket);
-        break;
-      case Operation::INSERT:
-        this->handle_insert(tokens, new_socket);
-        break;
-      case Operation::QUIT:
-        this->handle_quit(tokens, new_socket);
-        break;
-      case Operation::INVALID:
+      try {
+        Query query = this->query_parser->to_query(trimmed_buf);
+        this->execute_query(query, new_socket);
+      } catch (std::invalid_argument err) {
         this->logger->error(
-            std::format("Invalid operation: {}", tokens[0].size()));
-        break;
-      default:
-        break;
+            std::format("failed to parse the command: {}", err.what()));
       }
     }
 
@@ -147,63 +114,43 @@ TcpServer::~TcpServer() {
   }
 }
 
-void TcpServer::handle_read(std::vector<std::string> &tokens, int socket) {
-
-  if (tokens.size() != 3) {
-    this->logger->error(std::format("Invalid command: {}", tokens[0]));
+void TcpServer::execute_query(Query &query, int socket) {
+  switch (query.operation) {
+  case Operation::READ:
+    return this->handle_read(query, socket);
+  case Operation::INSERT:
+    return this->handle_insert(query, socket);
+  case Operation::QUIT:
+    return this->handle_quit(query, socket);
+  case Operation::INVALID:
     return;
   }
-
-  auto start = stoi(tokens[1], 0, 10);
-  auto end = stoi(tokens[2], 0, 10);
-
-  this->logger->info(std::format("got tcp request: read {} {}", start, end));
-
-  TypedSeries<int> int_series("perf_test", database);
-  auto read_points = int_series.read(start, end);
-
-  std::string response;
-
-  for (auto &point : read_points) {
-    response += point.to_string() + "\n";
-  }
-
-  char *response_buff = new char[response.size()];
-
-  std::strcpy(response_buff, response.c_str());
-
-  write(socket, response_buff, response.size());
-
-  delete[] response_buff;
 }
 
-void TcpServer::handle_insert(std::vector<std::string> &tokens, int socket) {
+void TcpServer::handle_read(Query &query, int socket) {
 
-  if (tokens.size() != 3) {
-    this->logger->error(std::format("Invalid command: {}", tokens[0]));
-    return;
-  }
+  this->logger->info(
+      std::format("got read request over tcp: {}", query.to_string()));
 
-  TypedSeries<int> int_series("perf_test", database);
+  auto read_points = this->database->read(
+      query.series, query.read_params.range_start, query.read_params.range_end);
 
-  if (tokens.size() != 3) {
-    this->logger->error("Invalid command: " + tokens[0]);
-    return;
-  }
+  auto encoded_response = this->response_encoders[query.data_type]->encode_many(
+      std::make_shared<std::vector<DataPoint>>(read_points));
 
-  auto key = stoi(tokens[1], 0, 10);
-  int value = stoi(tokens[2], 0, 10);
-
-  int_series.insert(key, value);
-  this->logger->info(std::format("got tcp request: insert {} {}", key, value));
+  write(socket, encoded_response.data(), encoded_response.size());
 }
 
-void TcpServer::handle_quit(std::vector<std::string> &tokens, int socket) {
+void TcpServer::handle_insert(Query &query, int socket) {
 
-  if (tokens.size() != 1) {
-    this->logger->error(std::format("Invalid command: {}", tokens[0]));
-    return;
-  }
+  this->logger->info(
+      std::format("got insert request over tcp: {}", query.to_string()));
+
+  database->insert(query.series, query.insert_params.key,
+                   query.insert_params.value);
+}
+
+void TcpServer::handle_quit(Query &query, int socket) {
 
   close(socket);
 

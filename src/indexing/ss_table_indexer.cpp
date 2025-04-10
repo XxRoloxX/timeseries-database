@@ -12,8 +12,7 @@ IndexesMetadataBlock SSTableIndexer::create_indexes(
 
   for (int i = 0; i < datapoints->size(); i++) {
 
-    auto encoded_datapoint =
-        this->encoder->encode(std::make_shared<DataPoint>(datapoints->at(i)));
+    auto encoded_datapoint = this->encoder->encode(datapoints->at(i));
 
     // If index is neither last nor first we check the ratio.
     if (i == 0 || i == (datapoints->size() - 1) || i % ratio == 0) {
