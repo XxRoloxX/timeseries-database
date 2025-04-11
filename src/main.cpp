@@ -4,6 +4,7 @@
 #include "./utils.h"
 #include "database.h"
 #include "datapoints/data_point.h"
+#include "logger/logger.h"
 #include "query/parser.h"
 #include "server/server.h"
 #include "typed_series/typed_series.h"
@@ -23,7 +24,8 @@ int main() {
       {DataType::BINARY,
        std::make_shared<PlaintextDataPointEncoder>(DataType::BINARY)}};
 
-  std::shared_ptr<Logger> logger = std::make_shared<StdLogger>();
+  // std::shared_ptr<Logger> logger = std::make_shared<StdLogger>();
+  std::shared_ptr<Logger> logger = std::make_shared<DummyLogger>();
 
   std::vector<DataPoint> data = {
       DataPoint(20, std::vector<char>{19}),

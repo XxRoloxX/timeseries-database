@@ -14,3 +14,9 @@ public:
   void info(std::string msg) override;
   void error(std::string msg) override;
 };
+
+class DummyLogger : public Logger {
+public:
+  void info(std::string msg) override;
+  void error(std::string msg) override;
+};

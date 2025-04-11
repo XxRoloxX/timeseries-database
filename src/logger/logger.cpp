@@ -45,3 +45,7 @@ void StdLogger::error(std::string msg) {
   log_file << log << std::endl;
   log_file.close();
 }
+
+void DummyLogger::info(std::string msg) {}
+
+void DummyLogger::error(std::string msg) {}

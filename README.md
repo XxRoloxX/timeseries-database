@@ -1,87 +1,68 @@
-# Baza szeregów czasowych
+# Time Series Database
+## 1. Introduction
 
-## 1. Wprowadzenie
+The goal of this project is to create a database optimized for applications involving time-series data.
+## 2. Problem Characteristics
 
-Celem tego projektu jest stworzenie bazy zoptymalizowanej do zastosowań z danymi o charakterystyce szeregów czasowych.
+Time-series databases store vast amounts of data, which are written and read in the context of their "creation" timestamp. The most common uses of such databases are the collection of metrics or events that are only significant in the context of their time of occurrence. These data types are characterized by high repetition rates and very high write frequencies (much higher than read frequencies, which is unusual for database systems). Additionally, due to the nature of their applications, such databases typically do not require strict consistency (in the case of scaling across multiple instances).
 
-## 2. Charakterystyka problemu
+Therefore, it is crucial for the implementation of such a database to be optimized for non-blocking and efficient writes.
 
-Bazy szeregów czasowych przechowują olbrzymią ilość danych, które są zapisywane i
-odczytywane w kontekście momentu ich "utworzenia". Najpowszechniejszymi zastosowaniami takich baz to zbieranie metryk czy wydarzeń mających
-wyłącznie znaczenie w kontekście ich czasu wystpąpienia. Dane takie charakteryzują się dużą powtarzalnością oraz bardzo dużą częstotliwością zapisów
-(dużo większą niż odczytów co jest nietypowe w kontekście baz danych). Dodatkowo ze względu na charakterystyke zastosowań bazy takie zwykle nie wymagają ściłej
-spójności (w przypadku skalowania bazy na wiele instancji).
+## 3. Current Solutions
 
-W związku z powyższym kluczowe jest aby impementacja takiej bazy była zoptymalizowana pod kątem
-**nieblokujących i efektywnych zapisów**.
+Popular time-series databases, such as Prometheus, ScyllaDB, and Gorilla, use mechanisms like Log-Structured Merge Trees (LSM-trees), SSTables, and Memtables as write-back caches. These are fundamental building blocks for constructing a time-series database. A proper implementation of just these structures should be sufficient to achieve satisfactory results.
 
-## 3. Obecne rozwiązania
+## 4. Functional Requirements
 
-Popularne rozwiązania oferujące bazy szeregów czasowych takie jak Prometheus, ScyllaDB czy Gorilla wykorzystują mechanizmy
-takie jak Log structured merge tree (LSM-tree), SSTables czy Memtables w roli write back cache'u. Są to podstawowe bloki
-pozwalające na budowe bazy szeregów czasowych. Poprawne implementacja wyłącznie tych struktur powinna wystarczyć do uzyskania
-zadawalających wyników.
+Data reading based on a range of record timestamps.
+Record values should be numeric (either integer or floating point), similar to Prometheus.
+Writing new records along with their timestamp.
 
-## 4. Wymagania funkcjonalne
+## 5. Non-Functional Requirements
 
-- odczyt danych na podstawie zakresu sygnatury czasowej rekordów
-- wartości rekordów powinny być typu liczbowego (całkowitoliczbowego lub zmiennoprzecinkowego), analogicznie jak w Prometheus.
-- zapisywanie nowych rekordów wraz z ich sygnaturą czasową
+Optimization of non-blocking writes to the database.
+Usage of host system files for saving the database state.
 
-## 5. Wymagania niefunkcjonalne
+## 6. System Architecture
 
-- optymalizacja nieblokujących zapisów do bazy danych
-- wykorzystanie plików w systemie hosta do zapisu stanu bazy danych
+The system should employ state-of-the-art mechanisms in the context of time-series databases.
+Database writing is split into two stages:
+Write to Memtable, implemented as a red-black tree.
+Write the record to the commit log (to prevent data loss in case of failure).
+Once Memtable is full, write to SSTable.
+Based on certain criteria (time-based or memory-based), the resulting SSTables are merged to optimize queries. Thanks to the append-only approach, most operations may be non-blocking.
 
-## 6. Architektura systemu
+Reading from the database is done by checking the presence of records within a given range in both Memtable and all corresponding SSTables. The TSDB will store individual timestamps of time-series along with references to their file and offset. Since SSTables contain sorted data, this allows limiting the key search to only the relevant range, which can be dynamically adjusted (at the cost of memory usage).
 
-System powinien korzystać z mechanizmów stanowiących state-of-the-art w kontekście baz time-series.
+Each series has a separate LSM mechanism due to the typical query characteristics, which do not mix series.
 
-Zapis do bazy podzielony jest na dwa etapy:
+## 7. Example Use Cases
 
-- Zapis do memtable, zaimplementowanej jako drzewo czerwono-czarne
-- Zapisz rekordu do commit loga (aby nie utracić danych w przypadku awarii)
-- Przy wypełneniu memtable zapis do SSTable
-- Na podstawie określonych kryterów (czasowe lub pamięciowe), powstałe SSTable zostają scalane aby zoptymalizować zapytania Dzięki podejściu append-only, większość operacji może nie być blokujących
+Recording metrics from computer systems (CPU usage, network statistics/packets, execution of specific paths in source code).
+Analytical data related to web systems (similar to Google Analytics / ClickHouse).
 
-Odczyt do bazy jest wykonywany poprzez sprawdzenie obecności rekordów z danego zakresu w memtable oraz wszystkich odpowiadających sstables.
-TSDB będzie przechowywała pojedyncze sygnatury czasowe szeregów czasowych z odniesieniem do pliku
-I offsetu w którym się znajduje. Korzystając z faktu że SSTables posiadają dane, które
-są posortowane to pozwoli nam to na ograniczenie przeszukiwania kluczy z całego pliku do
-tylko określonego zakresu, którego wielkośc może byś dynamicznie dostosowywana (kosztem zużycia pamięci)
+## 8. Additional tasks worth considering if time permits:
 
-Każdy szereg posiada osobny mechanizm LSM ze względu na typową charakterystyke zapytań, która nie miesza szeregów.
+Support for efficient record encoding using the repetitive nature of records.
+Use of Bloom filters to optimize queries.
 
-## 7. Przykładowe przypadki użycia
+## 9. Development Environment
 
-- rejestrowanie metryk z systemów komputerowych (zużycie procesora, statystyki sieci/pakietów, wykonań konkretnych ścieżek w kodzie źródłowym)
-- dane analityczne związane z systemami webowymi (analogiczne do google analytics / clickhouse)
+Code Editor: Nvim (clangd, lldb) 
 
-## 8. Podsumowanie i dalsze kroki
+Test Suite: googletest
 
-W ramach realizacji projektu zadaniami z największym priorytetem są:
+Debugger: gdb
 
-- implementacja LSM-tree / memtable / SSTables do efektywnego zapisu I odczytu danych z pliku
-- implementacja metod do interfejsowania z bazą danych w ramach biblioteki w C++
-- wsparcie dla własnościowego języka zapytań, jego parsera i executora
+Compiler: gcc
 
-Dodatkowymi zaganieniami wartymi poruszenia w przypadku nadmiernego czasu:
+Build System: cmake
 
-- wsparcie etykiet / tagów pozwalających na wygodniejsze zastosowanie w metrykach (analogicznie do Prometheus)
-- wsparcie efektywnego kodowania rekordów korzystając z powtarzalnej natury rekordów
-- wykorzystanie Bloom filter do optymalizacji zapytań
-- dodanie serwera TCP/UDP do obsługi zapytań poprzez sieć
+External Dependencies: boost
 
-## 7. Środowisko programistyczne
+Version Control System: git
 
-- Edytor kodu: Nvim (clangd, lldb) , Clion
-- test suite: googletest
-- kompilator: gcc
-- build system: cmake
-- zewnętrzne zależności: boost
-- System kontroli wersji: git
-
-## 8. Źródła, referencje, inspiracje:
+## 10. Sources, References, Inspirations:
 
 - https://www.alibabacloud.com/blog/598114?spm=a3c0i.29367734.6737026690.4.235c7d3fJQAJtP
 - https://opensource.docs.scylladb.com/stable/architecture/sstable/sstable3/sstables-3-data-file-format.html
@@ -94,3 +75,4 @@ Dodatkowymi zaganieniami wartymi poruszenia w przypadku nadmiernego czasu:
 - https://www.geeksforgeeks.org/sstable-in-apache-cassandra/
 - https://blog.cloudflare.com/how-cloudflare-runs-prometheus-at-scale/
 - https://cloud.google.com/bigtable/docs/schema-design-time-series
+
